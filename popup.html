@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaming Tools Suite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Variables CSS pour les thèmes */
+        :root {
+            --primary-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --header-bg: linear-gradient(135deg, #ff6b6b, #feca57);
+            --card-bg: rgba(255,255,255,0.1);
+            --border-color: rgba(255,255,255,0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.7);
+            --button-primary: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            --button-primary-hover: rgba(255, 107, 107, 0.4);
+            --button-secondary: linear-gradient(135deg, #667eea, #764ba2);
+            --button-secondary-hover: rgba(102, 126, 234, 0.4);
+            --button-success: linear-gradient(135deg, #48cae4, #0077b6);
+            --button-success-hover: rgba(72, 202, 228, 0.4);
+            --button-warning: linear-gradient(135deg, #ffd60a, #ff8500);
+            --button-warning-hover: rgba(255, 214, 10, 0.4);
+            --button-danger: linear-gradient(135deg, #f72585, #b5179e);
+            --button-danger-hover: rgba(247, 37, 133, 0.4);
+            --hotkey-bg: linear-gradient(135deg, #2d3748, #4a5568);
+            --hotkey-border: #667eea;
+            --status-success-bg: rgba(72, 202, 228, 0.2);
+            --status-success-color: #48cae4;
+            --status-success-border: #48cae4;
+            --status-error-bg: rgba(247, 37, 133, 0.2);
+            --status-error-color: #f72585;
+            --status-error-border: #f72585;
+        }
+
+        /* Thème sombre adaptatif */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-bg: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+                --header-bg: linear-gradient(135deg, #333333, #444444);
+                --card-bg: rgba(255,255,255,0.05);
+                --border-color: rgba(255,255,255,0.1);
+                --text-primary: #ffffff;
+                --text-secondary: rgba(255,255,255,0.6);
+                --button-primary: linear-gradient(135deg, #404040, #505050);
+                --button-primary-hover: rgba(80, 80, 80, 0.4);
+                --button-secondary: linear-gradient(135deg, #333333, #444444);
+                --button-secondary-hover: rgba(68, 68, 68, 0.4);
+                --button-success: linear-gradient(135deg, #2a5a2a, #3a7a3a);
+                --button-success-hover: rgba(58, 122, 58, 0.4);
+                --button-warning: linear-gradient(135deg, #5a4a2a, #7a6a3a);
+                --button-warning-hover: rgba(122, 106, 58, 0.4);
+                --button-danger: linear-gradient(135deg, #5a2a2a, #7a3a3a);
+                --button-danger-hover: rgba(122, 58, 58, 0.4);
+                --hotkey-bg: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+                --hotkey-border: #555555;
+                --status-success-bg: rgba(42, 90, 42, 0.3);
+                --status-success-color: #90ff90;
+                --status-success-border: #90ff90;
+                --status-error-bg: rgba(90, 42, 42, 0.3);
+                --status-error-color: #ff9090;
+                --status-error-border: #ff9090;
+            }
+        }
+
+        body {
+            width: 400px;
+            min-height: 600px;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            /* Utilisation de la variable */
+            background: var(--primary-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        .header {
+            /* Utilisation de la variable */
+            background: var(--header-bg);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" patternUnits="userSpaceOnUse" width="100" height="100"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grain)"/></svg>') repeat;
+            opacity: 0.3;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .tab-nav {
+            /* Utilisation de la variable */
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 4px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            /* Ajout de la bordure variable */
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            /* Utilisation de la variable */
+            color: var(--text-secondary);
+            border-radius: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 11px;
+        }
+
+        .tab-btn.active {
+            /* Utilisation de la variable */
+            background: var(--button-secondary);
+            color: var(--text-primary);
+            box-shadow: 0 4px 15px var(--button-secondary-hover);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section {
+            /* Utilisation de la variable */
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(15px);
+            /* Utilisation de la variable */
+            border: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            /* Utilisation de la variable */
+            color: var(--text-primary);
+        }
+
+        .button {
+            width: 100%;
+            padding: 14px 20px;
+            /* Utilisation de la variable */
+            background: var(--button-primary);
+            border: none;
+            border-radius: 12px;
+            /* Utilisation de la variable */
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .button:hover::before {
+            left: 100%;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            /* Utilisation de la variable */
+            box-shadow: 0 8px 25px var(--button-primary-hover);
+        }
+
+        .button.primary {
+            /* Utilisation de la variable */
+            background: var(--button-secondary);
+        }
+
+        .button.primary:hover {
+            /* Utilisation de la variable */
+            box-shadow: 0 8px 25px var(--button-secondary-hover);
+        }
+
+        .button.success {
+            /* Utilisation de la variable */
+            background: var(--button-success);
+        }
+
+        .button.success:hover {
+            /* Utilisation de la variable */
+            box-shadow: 0 8px 25px var(--button-success-hover);
+        }
+
+        .button.warning {
+            /* Utilisation de la variable */
+            background: var(--button-warning);
+        }
+
+        .button.warning:hover {
+            /* Utilisation de la variable */
+            box-shadow: 0 8px 25px var(--button-warning-hover);
+        }
+
+        .button.danger {
+            /* Utilisation de la variable */
+            background: var(--button-danger);
+        }
+
+        .button.danger:hover {
+            /* Utilisation de la variable */
+            box-shadow: 0 8px 25px var(--button-danger-hover);
+        }
+
+        .hotkey-display {
+            /* Utilisation de la variable */
+            background: var(--hotkey-bg);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            /* Utilisation de la variable */
+            border: 2px solid var(--hotkey-border);
+            margin-bottom: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            /* Ajout de la couleur de texte variable */
+            color: var(--text-primary);
+        }
+
+        .hotkey-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .special-keys {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .hotkey-btn {
+            padding: 10px 8px;
+            /* Utilisation de la variable */
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            /* Utilisation de la variable */
+            color: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .hotkey-btn:hover {
+            background: rgba(255,255,255,0.2);
+            /* Utilisation de la variable */
+            border-color: var(--hotkey-border);
+            transform: scale(1.05);
+        }
+
+        .hotkey-btn.active {
+            /* Utilisation de la variable */
+            background: var(--button-secondary);
+            color: var(--text-primary);
+            /* Utilisation de la variable */
+            border-color: var(--hotkey-border);
+        }
+
+        .custom-input {
+            width: 100%;
+            padding: 12px;
+            /* Utilisation de la variable */
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            /* Utilisation de la variable */
+            color: var(--text-primary);
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .custom-input::placeholder {
+            /* Utilisation de la variable */
+            color: var(--text-secondary);
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 12px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .status.success {
+            /* Utilisation des variables */
+            background: var(--status-success-bg);
+            color: var(--status-success-color);
+            border: 1px solid var(--status-success-border);
+        }
+
+        .status.error {
+            /* Utilisation des variables */
+            background: var(--status-error-bg);
+            color: var(--status-error-color);
+            border: 1px solid var(--status-error-border);
+        }
+
+        .instructions {
+            /* Utilisation des variables */
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 12px;
+            line-height: 1.6;
+            border-left: 4px solid var(--hotkey-border);
+            /* Ajout de la couleur de texte variable */
+            color: var(--text-primary);
+        }
+
+        .emoji {
+            font-size: 16px;
+            margin-right: 8px;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            /* Utilisation de la variable */
+            border-bottom: 1px solid var(--border-color);
+            /* Ajout de la couleur de texte variable */
+            color: var(--text-primary);
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .icon-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            /* Utilisation de la variable */
+            background: var(--card-bg);
+            border: none;
+            /* Utilisation de la variable */
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 8px;
+        }
+
+        .icon-button:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.1);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 16px;
+            font-size: 10px;
+            opacity: 0.7;
+            /* Utilisation de la variable */
+            border-top: 1px solid var(--border-color);
+            margin-top: 20px;
+            /* Ajout de la couleur de texte variable */
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">⚡ Gaming Tools Suite</div>
+        <div class="subtitle">Timer Speedrun & Subway Surfers Manager</div>
+    </div>
+
+    <div class="container">
+        <div class="tab-nav">
+            <button class="tab-btn active" data-tab="timer">🏃‍♂️ Timer</button>
+            <button class="tab-btn" data-tab="subway">🚇 Subway</button>
+            <button class="tab-btn" data-tab="zqsd">⌨️ ZQSD</button>
+        </div>
+
+        <div class="tab-content active" id="timer-tab">
+            <div class="section">
+                <div class="section-title">⏱️ Contrôles Timer</div>
+                <button class="button primary" id="toggleTimer">🎯 Afficher/Masquer Timer</button>
+            </div>
+
+            <div class="section">
+                <div class="section-title">⌨️ Touche Active</div>
+                <div class="hotkey-display" id="currentHotkeyDisplay">T</div>
+                
+                <div class="section-title">🔧 Touches Spéciales</div>
+                <div class="special-keys">
+                    <div class="hotkey-btn" data-key="Control">CTRL</div>
+                    <div class="hotkey-btn" data-key="Shift">SHIFT</div>
+                    <div class="hotkey-btn" data-key="Alt">ALT</div>
+                    <div class="hotkey-btn" data-key="Meta">META</div>
+                </div>
+
+                <div class="section-title">🎮 Touches Normales</div>
+                <div class="hotkey-grid">
+                    <div class="hotkey-btn" data-key="KeyT">T</div>
+                    <div class="hotkey-btn" data-key="KeyR">R</div>
+                    <div class="hotkey-btn" data-key="KeyQ">Q</div>
+                    <div class="hotkey-btn" data-key="Space">SPACE</div>
+                    <div class="hotkey-btn" data-key="F1">F1</div>
+                    <div class="hotkey-btn" data-key="F2">F2</div>
+                </div>
+
+                <input type="text" class="custom-input" id="customKeyInput" placeholder="Ou appuyez sur une touche...">
+            </div>
+
+            <div class="instructions">
+                <div class="section-title">💡 Mode d'emploi</div>
+                <ul class="feature-list">
+                    <li>• Cliquez "Afficher Timer" pour voir l'overlay</li>
+                    <li>• Utilisez votre touche : Démarrer → Pause → Reset</li>
+                    <li>• Glissez-déposez l'overlay où vous voulez</li>
+                    <li>• Redimensionnez avec les poignées</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="tab-content" id="subway-tab">
+            <div class="section">
+                <div class="section-title">💾 Gestion des Sauvegardes</div>
+                <button class="button success" id="backup">
+                    <span class="emoji">📦</span>Faire Backup
+                </button>
+                <button class="button primary" id="restore">
+                    <span class="emoji">📥</span>Restaurer Backup
+                </button>
+                <button class="button warning" id="save100">
+                    <span class="emoji">🏆</span>Save 100% Complet
+                </button>
+                <button class="button danger" id="cleanData">
+                    <span class="emoji">🗑️</span>Nettoyer Données
+                </button>
+            </div>
+
+            <div class="section">
+                <div class="section-title">📊 Contenu Save 100%</div>
+                <ul class="feature-list">
+                    <li>• Tous les personnages débloqués</li>
+                    <li>• Toutes les planches disponibles</li>
+                    <li>• Power-ups au maximum</li>
+                    <li>• Missions completées</li>
+                    <li>• Score élevé : 8,551,105 points</li>
+                    <li>• Pièces et clés illimitées</li>
+                </ul>
+            </div>
+
+            <div class="instructions">
+                <div class="section-title">⚠️ Important</div>
+                <p>Sauvegardez toujours votre progression avant d'utiliser les outils de restauration. Cette extension fonctionne avec la version web de Subway Surfers.</p>
+            </div>
+        </div>
+
+        <div class="tab-content" id="zqsd-tab">
+            <div class="section">
+                <div class="section-title">⌨️ Contrôles ZQSD</div>
+                <button class="button primary" id="activateZqsd">
+                    <span class="emoji">🎮</span>Activer ZQSD
+                </button>
+                <button class="button danger" id="deactivateZqsd">
+                    <span class="emoji">⛔</span>Désactiver ZQSD
+                </button>
+            </div>
+
+            <div class="section">
+                <div class="section-title">🎯 Mapping des touches</div>
+                <ul class="feature-list">
+                    <li>• Z → Flèche Haut</li>
+                    <li>• Q → Flèche Gauche</li>
+                    <li>• S → Flèche Bas</li>
+                    <li>• D → Flèche Droite</li>
+                    <li>• 1 → Barre Espace</li>
+                </ul>
+            </div>
+
+            <div class="instructions">
+                <div class="section-title">💡 Mode d'emploi</div>
+                <p>Activez le script ZQSD pour mapper les touches Z, Q, S, D vers les flèches directionnelles. Parfait pour les jeux qui utilisent les flèches mais où vous préférez ZQSD.</p>
+            </div>
+        </div>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <div class="footer">
+        v3.0 - Extension Gaming Tools Suite
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

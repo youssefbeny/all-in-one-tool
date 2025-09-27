@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Gaming Tools Suite",
+  "version": "3.0",
+  "description": "Suite d'outils gaming: Timer speedrun personnalisable et gestionnaire de sauvegarde Subway Surfers",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "downloads"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Gaming Tools Suite",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}
