@@ -1,38 +1,54 @@
+/*!
+ * BSD 3-Clause License
+ * 
+ * Copyright (c) 2025, [Ben yedder]
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of [Ben yedder] nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 console.log("Gaming Tools Suite - Content script chargé");
 
 // Variables globales pour le timer
 let timerOverlay = null;
-let timerState = 'stopped'; // stopped, running, paused
+let timerState = 'stopped';
 let startTime = null;
 let currentTime = 0;
 let timerInterval = null;
 let isVisible = false;
 let currentHotkey = 'KeyT';
 
-// Charger les paramètres sauvegardés
-loadSettings();
+// Charger la hotkey au démarrage
+chrome.runtime.sendMessage({ action: "getHotkey" }, (response) => {
+    if (response && response.hotkey) {
+        currentHotkey = response.hotkey;
+        console.log("Hotkey chargée:", currentHotkey);
+    }
+});
 
-function loadSettings() {
-    chrome.runtime.sendMessage({ action: "getHotkey" }, (response) => {
-        if (response && response.hotkey) {
-            currentHotkey = response.hotkey;
-            console.log("Hotkey chargée:", currentHotkey);
-        }
-    });
-    
-    chrome.runtime.sendMessage({ action: "getTimerSettings" }, (response) => {
-        if (response && response.settings && timerOverlay) {
-            const settings = response.settings;
-            timerOverlay.style.left = settings.position.x + 'px';
-            timerOverlay.style.top = settings.position.y + 'px';
-            timerOverlay.style.width = settings.size.width + 'px';
-            timerOverlay.style.height = settings.size.height + 'px';
-            updateFontSize(settings.size.width, settings.size.height);
-        }
-    });
-}
-
-// Créer l'overlay du timer
+// Créer l'overlay du timer immédiatement
 function createTimerOverlay() {
     if (timerOverlay) return;
     
@@ -46,21 +62,20 @@ function createTimerOverlay() {
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                width: 320px;
-                height: 80px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                border: 2px solid #ffffff;
-                border-radius: 16px;
-                font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+                width: 300px;
+                height: 60px;
+                background: linear-gradient(to bottom, #2d2d30 0%, #1e1e1e 100%);
+                border: 1px solid #3c3c3c;
+                border-radius: 0;
+                font-family: 'Consolas', 'Monaco', 'Lucida Console', monospace;
                 z-index: 999999;
                 display: none;
                 user-select: none;
-                box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
-                backdrop-filter: blur(20px);
-                min-width: 200px;
-                min-height: 50px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+                min-width: 150px;
+                min-height: 30px;
                 max-width: 800px;
-                max-height: 200px;
+                max-height: 150px;
                 overflow: hidden;
             }
             
@@ -72,177 +87,71 @@ function createTimerOverlay() {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background: rgba(255,255,255,0.1);
-                border-radius: 14px;
-                margin: 2px;
+                padding: 8px 16px;
             }
             
             #timer-display {
                 color: #ffffff;
-                font-weight: 900;
+                font-weight: bold;
                 text-align: center;
-                text-shadow: 0 0 20px rgba(255,255,255,0.5);
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
                 white-space: nowrap;
-                overflow: hidden;
-                font-size: 36px;
-                letter-spacing: 2px;
+                font-size: 32px;
+                letter-spacing: 1px;
+                line-height: 1;
+                font-family: 'Consolas', 'Monaco', 'Lucida Console', monospace;
             }
             
-            .timer-stopped { 
-                color: #ffffff !important;
-                text-shadow: 0 0 20px rgba(255,255,255,0.3) !important;
-            }
-            .timer-running { 
-                color: #00ff88 !important;
-                text-shadow: 0 0 30px rgba(0,255,136,0.8) !important;
-                animation: pulse 2s infinite;
-            }
-            .timer-paused { 
-                color: #ffd60a !important;
-                text-shadow: 0 0 30px rgba(255,214,10,0.8) !important;
-                animation: blink 1s infinite;
-            }
-            
-            @keyframes pulse {
-                0%, 100% { transform: scale(1); }
-                50% { transform: scale(1.05); }
-            }
-            
-            @keyframes blink {
-                0%, 50% { opacity: 1; }
-                51%, 100% { opacity: 0.5; }
-            }
+            .timer-stopped { color: #cccccc !important; }
+            .timer-running { color: #ffffff !important; }
+            .timer-paused { color: #ffffff !important; }
             
             #speedrun-timer-overlay:hover {
-                box-shadow: 0 12px 40px rgba(102, 126, 234, 0.6);
-                transform: translateY(-2px);
+                background: linear-gradient(to bottom, #353538 0%, #252525 100%);
+                border-color: #4c4c4c;
             }
             
-            /* Poignées de redimensionnement */
             .resize-handle {
                 position: absolute;
-                /* MODIFIÉ : Rendre l'arrière-plan totalement transparent pour supprimer les barres */
-                background: transparent; 
+                background: transparent;
                 z-index: 1000000;
-                transition: all 0.2s;
-                border-radius: 4px;
+                opacity: 0;
+            }
+            
+            #speedrun-timer-overlay:hover .resize-handle {
+                opacity: 1;
+                background: rgba(100, 100, 100, 0.3);
             }
             
             .resize-handle:hover {
-                /* MODIFIÉ : Rendre l'arrière-plan totalement transparent même au survol */
-                background: transparent; 
-                /* Nous gardons le scale pour que le curseur change, mais le background reste invisible */
-                transform: scale(1.2);
+                background: rgba(150, 150, 150, 0.5) !important;
             }
             
-            /* Coins */
-            .resize-nw {
-                top: -8px;
-                left: -8px;
-                width: 16px;
-                height: 16px;
-                cursor: nw-resize;
-                border-top-left-radius: 8px;
-            }
-            
-            .resize-ne {
-                top: -8px;
-                right: -8px;
-                width: 16px;
-                height: 16px;
-                cursor: ne-resize;
-                border-top-right-radius: 8px;
-            }
-            
-            .resize-sw {
-                bottom: -8px;
-                left: -8px;
-                width: 16px;
-                height: 16px;
-                cursor: sw-resize;
-                border-bottom-left-radius: 8px;
-            }
-            
-            .resize-se {
-                bottom: -8px;
-                right: -8px;
-                width: 16px;
-                height: 16px;
-                cursor: se-resize;
-                border-bottom-right-radius: 8px;
-            }
-            
-            /* Bordures */
-            .resize-n {
-                top: -8px;
-                left: 20px;
-                right: 20px;
-                height: 16px;
-                cursor: n-resize;
-            }
-            
-            .resize-s {
-                bottom: -8px;
-                left: 20px;
-                right: 20px;
-                height: 16px;
-                cursor: s-resize;
-            }
-            
-            .resize-w {
-                left: -8px;
-                top: 20px;
-                bottom: 20px;
-                width: 16px;
-                cursor: w-resize;
-            }
-            
-            .resize-e {
-                right: -8px;
-                top: 20px;
-                bottom: 20px;
-                width: 16px;
-                cursor: e-resize;
-            }
+            .resize-nw { top: -3px; left: -3px; width: 10px; height: 10px; cursor: nw-resize; }
+            .resize-ne { top: -3px; right: -3px; width: 10px; height: 10px; cursor: ne-resize; }
+            .resize-sw { bottom: -3px; left: -3px; width: 10px; height: 10px; cursor: sw-resize; }
+            .resize-se { bottom: -3px; right: -3px; width: 10px; height: 10px; cursor: se-resize; }
+            .resize-n { top: -3px; left: 10px; right: 10px; height: 6px; cursor: n-resize; }
+            .resize-s { bottom: -3px; left: 10px; right: 10px; height: 6px; cursor: s-resize; }
+            .resize-w { left: -3px; top: 10px; bottom: 10px; width: 6px; cursor: w-resize; }
+            .resize-e { right: -3px; top: 10px; bottom: 10px; width: 6px; cursor: e-resize; }
             
             .size-indicator {
                 position: absolute;
-                top: -40px;
+                top: -30px;
                 right: 0;
-                background: linear-gradient(135deg, #667eea, #764ba2);
-                color: #ffffff;
-                padding: 6px 12px;
-                border-radius: 20px;
-                font-size: 12px;
-                font-weight: 700;
+                background: rgba(45, 45, 48, 0.95);
+                color: #cccccc;
+                padding: 4px 8px;
+                font-size: 10px;
                 opacity: 0;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 pointer-events: none;
-                white-space: nowrap;
-                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                border: 1px solid #3c3c3c;
+                font-family: 'Consolas', 'Monaco', 'Lucida Console', monospace;
             }
             
-            #speedrun-timer-overlay.resizing .size-indicator {
-                opacity: 1;
-                transform: translateY(-5px);
-            }
-            
-            /* Animation d'apparition */
-            @keyframes slideInFromRight {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-            
-            #speedrun-timer-overlay.show {
-                animation: slideInFromRight 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            }
+            #speedrun-timer-overlay.resizing .size-indicator { opacity: 1; }
         </style>
         <div id="timer-content">
             <div id="timer-display" class="timer-stopped">00:00.000</div>
@@ -257,323 +166,205 @@ function createTimerOverlay() {
         <div class="resize-handle resize-w" data-direction="w"></div>
         <div class="resize-handle resize-e" data-direction="e"></div>
         
-        <div class="size-indicator">320px × 80px</div>
+        <div class="size-indicator">300px × 60px</div>
     `;
     
     document.body.appendChild(timerOverlay);
     makeDraggable(timerOverlay);
     makeResizable(timerOverlay);
-    
-    // Charger les paramètres sauvegardés
     loadSettings();
-    
-    console.log("Overlay créé et ajouté au DOM");
 }
 
-// Rendre l'overlay déplaçable
-function makeDraggable(element) {
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    let isDragging = false;
+// Initialiser le timer dès que possible
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', createTimerOverlay);
+} else {
+    createTimerOverlay();
+}
+
+function loadSettings() {
+    chrome.runtime.sendMessage({ action: "getTimerSettings" }, (response) => {
+        if (response && response.settings && timerOverlay) {
+            const s = response.settings;
+            timerOverlay.style.left = s.position.x + 'px';
+            timerOverlay.style.top = s.position.y + 'px';
+            timerOverlay.style.width = s.size.width + 'px';
+            timerOverlay.style.height = s.size.height + 'px';
+            updateFontSize(s.size.width, s.size.height);
+            if (s.visible) {
+                isVisible = true;
+                timerOverlay.style.display = 'block';
+            }
+        }
+    });
+}
+
+function makeDraggable(el) {
+    let pos1=0, pos2=0, pos3=0, pos4=0, isDragging=false;
+    const content = el.querySelector('#timer-content');
     
-    const timerContent = element.querySelector('#timer-content');
-    
-    timerContent.addEventListener('mousedown', startDrag);
-    
-    function startDrag(e) {
+    content.addEventListener('mousedown', (e) => {
         if (e.target.classList.contains('resize-handle')) return;
-        
         e.preventDefault();
         isDragging = true;
         pos3 = e.clientX;
         pos4 = e.clientY;
-        document.addEventListener('mousemove', doDrag);
-        document.addEventListener('mouseup', stopDrag);
-        timerContent.style.cursor = 'grabbing';
-    }
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stop);
+    });
     
-    function doDrag(e) {
+    function drag(e) {
         if (!isDragging) return;
         e.preventDefault();
         pos1 = pos3 - e.clientX;
         pos2 = pos4 - e.clientY;
         pos3 = e.clientX;
         pos4 = e.clientY;
-        element.style.top = (element.offsetTop - pos2) + "px";
-        element.style.left = (element.offsetLeft - pos1) + "px";
+        el.style.left = Math.max(0, Math.min(el.offsetLeft - pos1, window.innerWidth - el.offsetWidth)) + "px";
+        el.style.top = Math.max(0, Math.min(el.offsetTop - pos2, window.innerHeight - el.offsetHeight)) + "px";
     }
     
-    function stopDrag() {
+    function stop() {
         isDragging = false;
-        document.removeEventListener('mousemove', doDrag);
-        document.removeEventListener('mouseup', stopDrag);
-        timerContent.style.cursor = 'move';
-        
-        // Sauvegarder la position
+        document.removeEventListener('mousemove', drag);
+        document.removeEventListener('mouseup', stop);
         saveTimerSettings();
     }
 }
 
-// Rendre l'overlay redimensionnable
-function makeResizable(element) {
-    const handles = element.querySelectorAll('.resize-handle');
-    const sizeIndicator = element.querySelector('.size-indicator');
-    let isResizing = false;
-    let resizeDirection = '';
-    let startX = 0, startY = 0;
-    let startWidth = 0, startHeight = 0;
-    let startLeft = 0, startTop = 0;
+function makeResizable(el) {
+    const handles = el.querySelectorAll('.resize-handle');
+    const indicator = el.querySelector('.size-indicator');
+    let isResizing=false, dir='', startX=0, startY=0, startW=0, startH=0, startL=0, startT=0;
     
-    handles.forEach(handle => {
-        handle.addEventListener('mousedown', startResize);
-    });
-    
-    function startResize(e) {
+    handles.forEach(h => h.addEventListener('mousedown', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        
         isResizing = true;
-        resizeDirection = e.target.dataset.direction;
+        dir = e.target.dataset.direction;
         startX = e.clientX;
         startY = e.clientY;
-        
-        const rect = element.getBoundingClientRect();
-        startWidth = rect.width;
-        startHeight = rect.height;
-        startLeft = rect.left;
-        startTop = rect.top;
-        
-        element.classList.add('resizing');
-        document.addEventListener('mousemove', doResize);
+        const r = el.getBoundingClientRect();
+        startW = r.width;
+        startH = r.height;
+        startL = r.left;
+        startT = r.top;
+        el.classList.add('resizing');
+        document.addEventListener('mousemove', resize);
         document.addEventListener('mouseup', stopResize);
-        document.body.style.userSelect = 'none';
-    }
+    }));
     
-    function doResize(e) {
+    function resize(e) {
         if (!isResizing) return;
         e.preventDefault();
+        const dx = e.clientX - startX, dy = e.clientY - startY;
+        let w=startW, h=startH, l=startL, t=startT;
         
-        const deltaX = e.clientX - startX;
-        const deltaY = e.clientY - startY;
+        if(dir.includes('e')) w = Math.max(150, Math.min(800, startW + dx));
+        if(dir.includes('w')) { w = Math.max(150, Math.min(800, startW - dx)); l = startL + (startW - w); }
+        if(dir.includes('s')) h = Math.max(30, Math.min(150, startH + dy));
+        if(dir.includes('n')) { h = Math.max(30, Math.min(150, startH - dy)); t = startT + (startH - h); }
         
-        let newWidth = startWidth;
-        let newHeight = startHeight;
-        let newLeft = startLeft;
-        let newTop = startTop;
-        
-        switch(resizeDirection) {
-            case 'se':
-                newWidth = Math.max(200, Math.min(800, startWidth + deltaX));
-                newHeight = Math.max(50, Math.min(200, startHeight + deltaY));
-                break;
-            case 'sw':
-                newWidth = Math.max(200, Math.min(800, startWidth - deltaX));
-                newHeight = Math.max(50, Math.min(200, startHeight + deltaY));
-                newLeft = startLeft + (startWidth - newWidth);
-                break;
-            case 'ne':
-                newWidth = Math.max(200, Math.min(800, startWidth + deltaX));
-                newHeight = Math.max(50, Math.min(200, startHeight - deltaY));
-                newTop = startTop + (startHeight - newHeight);
-                break;
-            case 'nw':
-                newWidth = Math.max(200, Math.min(800, startWidth - deltaX));
-                newHeight = Math.max(50, Math.min(200, startHeight - deltaY));
-                newLeft = startLeft + (startWidth - newWidth);
-                newTop = startTop + (startHeight - newHeight);
-                break;
-            case 'n':
-                newHeight = Math.max(50, Math.min(200, startHeight - deltaY));
-                newTop = startTop + (startHeight - newHeight);
-                break;
-            case 's':
-                newHeight = Math.max(50, Math.min(200, startHeight + deltaY));
-                break;
-            case 'w':
-                newWidth = Math.max(200, Math.min(800, startWidth - deltaX));
-                newLeft = startLeft + (startWidth - newWidth);
-                break;
-            case 'e':
-                newWidth = Math.max(200, Math.min(800, startWidth + deltaX));
-                break;
-        }
-        
-        element.style.width = newWidth + 'px';
-        element.style.height = newHeight + 'px';
-        element.style.left = newLeft + 'px';
-        element.style.top = newTop + 'px';
-        
-        updateFontSize(newWidth, newHeight);
-        sizeIndicator.textContent = `${Math.round(newWidth)}px × ${Math.round(newHeight)}px`;
+        el.style.width = w + 'px';
+        el.style.height = h + 'px';
+        el.style.left = l + 'px';
+        el.style.top = t + 'px';
+        updateFontSize(w, h);
+        indicator.textContent = `${Math.round(w)}px × ${Math.round(h)}px`;
     }
     
     function stopResize() {
-        if (!isResizing) return;
-        
         isResizing = false;
-        document.removeEventListener('mousemove', doResize);
+        document.removeEventListener('mousemove', resize);
         document.removeEventListener('mouseup', stopResize);
-        document.body.style.userSelect = '';
-        element.classList.remove('resizing');
-        
+        el.classList.remove('resizing');
         saveTimerSettings();
     }
 }
 
-// Ajuster la taille de police proportionnellement
-function updateFontSize(width, height) {
-    const display = timerOverlay.querySelector('#timer-display');
-    if (!display) return;
-    
-    const baseWidth = 320;
-    const baseHeight = 80;
-    const baseFontSize = 36;
-    
-    const widthRatio = width / baseWidth;
-    const heightRatio = height / baseHeight;
-    const ratio = Math.min(widthRatio, heightRatio);
-    
-    const fontSize = Math.max(14, Math.min(72, baseFontSize * ratio));
-    display.style.fontSize = fontSize + 'px';
+function updateFontSize(w, h) {
+    const d = timerOverlay.querySelector('#timer-display');
+    if (!d) return;
+    const size = Math.max(12, Math.min(64, 32 * Math.min(w/300, h/60)));
+    d.style.fontSize = size + 'px';
 }
 
-// Sauvegarder les paramètres du timer
 function saveTimerSettings() {
     if (!timerOverlay) return;
-    
-    const rect = timerOverlay.getBoundingClientRect();
+    const r = timerOverlay.getBoundingClientRect();
     chrome.runtime.sendMessage({
         action: "saveTimerSettings",
-        position: { x: rect.left, y: rect.top },
-        size: { width: rect.width, height: rect.height },
+        position: { x: r.left, y: r.top },
+        size: { width: r.width, height: r.height },
         visible: isVisible
     });
 }
 
-// Formater le temps
-function formatTime(milliseconds) {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    const ms = Math.floor(milliseconds % 1000);
-    
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
+function formatTime(ms) {
+    const m = Math.floor(ms/60000);
+    const s = Math.floor((ms%60000)/1000);
+    const milli = Math.floor(ms%1000);
+    return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}.${milli.toString().padStart(3,'0')}`;
 }
 
-// Mettre à jour l'affichage du timer
 function updateTimer() {
     if (!timerOverlay || !isVisible) return;
-    
-    if (timerState === 'running') {
-        currentTime = performance.now() - startTime;
-    }
-    
-    const display = timerOverlay.querySelector('#timer-display');
-    display.textContent = formatTime(currentTime);
+    if (timerState === 'running') currentTime = performance.now() - startTime;
+    timerOverlay.querySelector('#timer-display').textContent = formatTime(currentTime);
 }
 
-// Contrôler le timer (start/pause/reset)
 function controlTimer() {
     if (!isVisible) return;
+    const d = timerOverlay.querySelector('#timer-display');
     
-    console.log("Contrôle timer, état actuel:", timerState);
-    const display = timerOverlay.querySelector('#timer-display');
-    
-    switch (timerState) {
-        case 'stopped':
-            startTime = performance.now();
-            timerState = 'running';
-            display.className = 'timer-running';
-            timerInterval = setInterval(updateTimer, 10);
-            console.log("Timer démarré");
-            break;
-            
-        case 'running':
-            clearInterval(timerInterval);
-            timerState = 'paused';
-            display.className = 'timer-paused';
-            console.log("Timer en pause");
-            break;
-            
-        case 'paused':
-            clearInterval(timerInterval);
-            timerState = 'stopped';
-            currentTime = 0;
-            display.className = 'timer-stopped';
-            display.textContent = '00:00.000';
-            console.log("Timer remis à zéro");
-            break;
+    if (timerState === 'stopped') {
+        startTime = performance.now();
+        timerState = 'running';
+        d.className = 'timer-running';
+        timerInterval = setInterval(updateTimer, 10);
+    } else if (timerState === 'running') {
+        clearInterval(timerInterval);
+        timerState = 'paused';
+        d.className = 'timer-paused';
+    } else {
+        clearInterval(timerInterval);
+        timerState = 'stopped';
+        currentTime = 0;
+        d.className = 'timer-stopped';
+        d.textContent = '00:00.000';
     }
 }
 
-// Toggle visibilité
 function toggleTimer() {
-    if (!timerOverlay) {
-        createTimerOverlay();
-    }
-    
+    if (!timerOverlay) createTimerOverlay();
     isVisible = !isVisible;
-    
-    if (isVisible) {
-        timerOverlay.style.display = 'block';
-        timerOverlay.classList.add('show');
-        updateTimer();
-    } else {
-        timerOverlay.style.display = 'none';
-        timerOverlay.classList.remove('show');
-    }
-    
-    console.log("Timer", isVisible ? "affiché" : "masqué");
+    timerOverlay.style.display = isVisible ? 'block' : 'none';
+    if (isVisible) updateTimer();
     saveTimerSettings();
 }
 
-// Écouter les messages du popup
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log("Content reçoit:", message);
-    
-    if (message.action === "toggleTimer") {
-        toggleTimer();
-        sendResponse({ success: true });
+chrome.runtime.onMessage.addListener((msg, sender, respond) => {
+    if (msg.action === "toggleTimer") { 
+        toggleTimer(); 
+        respond({success: true}); 
     }
-    
-    if (message.action === "updateHotkey") {
-        currentHotkey = message.hotkey;
-        console.log("Hotkey mise à jour:", currentHotkey);
-        sendResponse({ success: true });
+    if (msg.action === "updateHotkey") { 
+        currentHotkey = msg.hotkey; 
+        respond({success: true}); 
     }
 });
 
-// Écouter les touches du clavier
-document.addEventListener('keydown', function(event) {
-    if (event.repeat) return;
+document.addEventListener('keydown', (e) => {
+    if (e.repeat) return;
+    let match = false;
     
-    let isHotkeyPressed = false;
+    if (currentHotkey === 'Control' && e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey) match = true;
+    else if (currentHotkey === 'Shift' && e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) match = true;
+    else if (currentHotkey === 'Alt' && e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) match = true;
+    else if (currentHotkey === 'Meta' && e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey) match = true;
+    else if (currentHotkey === e.code && !e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey) match = true;
     
-    // Gestion des touches spéciales
-    if (currentHotkey === 'Control' && (event.ctrlKey && !event.altKey && !event.metaKey)) {
-        isHotkeyPressed = true;
-        event.preventDefault();
-    }
-    else if (currentHotkey === 'Shift' && (event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey)) {
-        isHotkeyPressed = true;
-        event.preventDefault();
-    }
-    else if (currentHotkey === 'Alt' && (event.altKey && !event.ctrlKey && !event.metaKey)) {
-        isHotkeyPressed = true;
-        event.preventDefault();
-    }
-    else if (currentHotkey === 'Meta' && (event.metaKey && !event.ctrlKey && !event.altKey)) {
-        isHotkeyPressed = true;
-        event.preventDefault();
-    }
-    else if (currentHotkey === event.code) {
-        isHotkeyPressed = true;
-        event.preventDefault();
-    }
-    
-    if (isHotkeyPressed) {
-        console.log("Hotkey détectée, contrôle du timer");
-        controlTimer();
-    }
+    if (match) { e.preventDefault(); controlTimer(); }
 });
 
 console.log("Gaming Tools Suite - Content script prêt");
