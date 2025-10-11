@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Gaming Tools Suite",
-  "version": "3.0",
-  "description": "Suite d'outils gaming: Timer speedrun personnalisable et gestionnaire de sauvegarde Subway Surfers",
+  "name": "Gaming Tools Suite Complete",
+  "version": "4.0",
+  "description": "Suite complète: Timer speedrun, Subway Surfers, ZQSD/WASD, résolution 608x1080",
   "permissions": [
     "activeTab",
     "scripting",
@@ -10,20 +10,26 @@
     "downloads"
   ],
   "host_permissions": [
-    "<all_urls>"
+    "https://yell0wsuit.page/*"
   ],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "Gaming Tools Suite",
-    "default_popup": "popup.html"
+    "default_title": "Gaming Tools Suite - Complete Edition",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
   },
   "content_scripts": [
     {
-      "matches": ["http://*/*", "https://*/*"],
+      "matches": ["https://yell0wsuit.page/*"],
       "js": ["content.js"],
-      "run_at": "document_end"
+      "run_at": "document_end",
+      "all_frames": false
     }
   ],
   "icons": {

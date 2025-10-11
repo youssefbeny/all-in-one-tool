@@ -1,35 +1,3 @@
-<!--
-BSD 3-Clause License
-
-Copyright (c) [année], [Ben yedder]
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-   this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
-
-3. Neither the name of [Ben yedder] nor the names of its
-   contributors may be used to endorse or promote products derived from
-   this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -44,68 +12,213 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         }
 
         :root {
-            --primary-bg: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-            --header-bg: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+            --primary-bg: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --header-bg: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
             --card-bg: rgba(255, 255, 255, 0.05);
             --card-hover-bg: rgba(255, 255, 255, 0.1);
-            --border-color: rgba(0, 217, 255, 0.2);
-            --border-hover-color: rgba(0, 217, 255, 0.4);
+            --border-color: rgba(94, 174, 255, 0.3);
+            --border-hover-color: rgba(94, 174, 255, 0.6);
             --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --text-accent: #00d9ff;
-            --button-primary: linear-gradient(135deg, #00d9ff, #0099cc);
-            --button-secondary: linear-gradient(135deg, #667eea, #764ba2);
-            --button-success: linear-gradient(135deg, #00ff88, #00cc6a);
-            --button-warning: linear-gradient(135deg, #fbbf24, #f59e0b);
-            --button-danger: linear-gradient(135deg, #ef4444, #dc2626);
-            --hotkey-bg: linear-gradient(135deg, #1e1e2e, #2d3748);
-            --hotkey-border: rgba(0, 217, 255, 0.5);
-            --hotkey-active-bg: var(--button-primary);
-            --status-success-bg: rgba(0, 255, 136, 0.1);
-            --status-success-color: #00ff88;
-            --status-success-border: #00ff88;
-            --status-error-bg: rgba(239, 68, 68, 0.1);
-            --status-error-color: #ef4444;
-            --status-error-border: #ef4444;
-            --glow-primary: 0 0 20px rgba(0, 217, 255, 0.3);
-            --glow-success: 0 0 20px rgba(0, 255, 136, 0.3);
-            --glow-warning: 0 0 20px rgba(251, 191, 36, 0.3);
-            --glow-danger: 0 0 20px rgba(239, 68, 68, 0.3);
+            --text-secondary: #b8c5d6;
+            --text-accent: #5eaeff;
+            --button-primary: linear-gradient(135deg, #5eaeff 0%, #3b82f6 100%);
+            --glow-primary: 0 0 20px rgba(94, 174, 255, 0.4);
+            --shadow-intense: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        body[data-theme="livesplit"] {
+            --primary-bg: #000000;
+            --header-bg: #1a1a1a;
+            --card-bg: #1a1a1a;
+            --card-hover-bg: #242424;
+            --border-color: #333333;
+            --border-hover-color: #444444;
+            --text-accent: #209cee;
+            --button-primary: #209cee;
+            --glow-primary: none;
+        }
+
+        body[data-theme="light"] {
+            --primary-bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --header-bg: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-hover-bg: rgba(241, 245, 249, 1);
+            --border-color: rgba(203, 213, 225, 0.6);
+            --border-hover-color: rgba(148, 163, 184, 0.8);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-accent: #2563eb;
+            --button-primary: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --glow-primary: 0 0 20px rgba(37, 99, 235, 0.3);
+            --shadow-intense: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        body[data-theme="dark"] {
+            --primary-bg: linear-gradient(135deg, #0f1115 0%, #1a1d24 100%);
+            --header-bg: linear-gradient(135deg, #1a1d24 0%, #14161a 100%);
+            --card-bg: rgba(30, 33, 40, 0.85);
+            --card-hover-bg: rgba(40, 43, 50, 0.95);
+            --border-color: rgba(75, 85, 99, 0.35);
+            --border-hover-color: rgba(75, 85, 99, 0.6);
+            --text-primary: #f8fafc;
+            --text-secondary: rgba(248, 250, 252, 0.75);
+            --text-accent: #60a5fa;
+            --button-primary: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            --glow-primary: 0 0 30px rgba(96, 165, 250, 0.3);
+            --shadow-intense: 0 10px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        body[data-theme="neon"] {
+            --primary-bg: linear-gradient(135deg, #1a0033 0%, #2d1b4e 50%, #1a0033 100%);
+            --header-bg: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+            --card-bg: rgba(147, 51, 234, 0.12);
+            --card-hover-bg: rgba(147, 51, 234, 0.2);
+            --border-color: rgba(167, 139, 250, 0.35);
+            --border-hover-color: rgba(167, 139, 250, 0.65);
+            --text-primary: #f5f3ff;
+            --text-secondary: #d8b4fe;
+            --text-accent: #c084fc;
+            --button-primary: linear-gradient(135deg, #c084fc 0%, #9333ea 100%);
+            --glow-primary: 0 0 35px rgba(192, 132, 252, 0.5);
+            --shadow-intense: 0 10px 40px rgba(147, 51, 234, 0.4);
+        }
+
+        body[data-theme="matrix"] {
+            --primary-bg: linear-gradient(135deg, #001a00 0%, #003300 50%, #001a00 100%);
+            --header-bg: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+            --card-bg: rgba(0, 255, 136, 0.12);
+            --card-hover-bg: rgba(0, 255, 136, 0.2);
+            --border-color: rgba(0, 255, 136, 0.35);
+            --border-hover-color: rgba(0, 255, 136, 0.65);
+            --text-primary: #d1fae5;
+            --text-secondary: #86efac;
+            --text-accent: #4ade80;
+            --button-primary: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            --glow-primary: 0 0 35px rgba(74, 222, 128, 0.5);
+            --shadow-intense: 0 10px 40px rgba(0, 255, 136, 0.3);
+        }
+
+        body[data-theme="sunset"] {
+            --primary-bg: linear-gradient(135deg, #1a0500 0%, #330a00 50%, #1a0500 100%);
+            --header-bg: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            --card-bg: rgba(255, 107, 107, 0.12);
+            --card-hover-bg: rgba(255, 107, 107, 0.2);
+            --border-color: rgba(255, 142, 83, 0.35);
+            --border-hover-color: rgba(255, 142, 83, 0.65);
+            --text-primary: #fff5e6;
+            --text-secondary: #fed7aa;
+            --text-accent: #fb923c;
+            --button-primary: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+            --glow-primary: 0 0 35px rgba(251, 146, 60, 0.5);
+            --shadow-intense: 0 10px 40px rgba(255, 107, 107, 0.4);
+        }
+
+        body[data-theme="ocean"] {
+            --primary-bg: linear-gradient(135deg, #001233 0%, #002147 50%, #001233 100%);
+            --header-bg: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+            --card-bg: rgba(14, 165, 233, 0.12);
+            --card-hover-bg: rgba(14, 165, 233, 0.2);
+            --border-color: rgba(79, 172, 254, 0.35);
+            --border-hover-color: rgba(79, 172, 254, 0.65);
+            --text-primary: #e0f2fe;
+            --text-secondary: #bae6fd;
+            --text-accent: #38bdf8;
+            --button-primary: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+            --glow-primary: 0 0 35px rgba(56, 189, 248, 0.5);
+            --shadow-intense: 0 10px 40px rgba(14, 165, 233, 0.4);
+        }
+
+        body[data-theme="rose"] {
+            --primary-bg: linear-gradient(135deg, #2d0a1f 0%, #4d1436 50%, #2d0a1f 100%);
+            --header-bg: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+            --card-bg: rgba(244, 114, 182, 0.12);
+            --card-hover-bg: rgba(244, 114, 182, 0.2);
+            --border-color: rgba(240, 147, 251, 0.35);
+            --border-hover-color: rgba(240, 147, 251, 0.65);
+            --text-primary: #fce7f3;
+            --text-secondary: #fbcfe8;
+            --text-accent: #f9a8d4;
+            --button-primary: linear-gradient(135deg, #f9a8d4 0%, #ec4899 100%);
+            --glow-primary: 0 0 35px rgba(249, 168, 212, 0.5);
+            --shadow-intense: 0 10px 40px rgba(244, 114, 182, 0.4);
+        }
+
+        body[data-theme="toxic"] {
+            --primary-bg: linear-gradient(135deg, #0d1f00 0%, #1a3300 50%, #0d1f00 100%);
+            --header-bg: linear-gradient(135deg, #84cc16 0%, #65a30d 100%);
+            --card-bg: rgba(132, 204, 22, 0.12);
+            --card-hover-bg: rgba(132, 204, 22, 0.2);
+            --border-color: rgba(57, 255, 20, 0.35);
+            --border-hover-color: rgba(57, 255, 20, 0.65);
+            --text-primary: #ecfccb;
+            --text-secondary: #d9f99d;
+            --text-accent: #bef264;
+            --button-primary: linear-gradient(135deg, #bef264 0%, #84cc16 100%);
+            --glow-primary: 0 0 35px rgba(190, 242, 100, 0.6);
+            --shadow-intense: 0 10px 40px rgba(132, 204, 22, 0.4);
+        }
+
+        body[data-theme="vaporwave"] {
+            --primary-bg: linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 50%, #1a0b2e 100%);
+            --header-bg: linear-gradient(135deg, #ff6ec7 0%, #00d4ff 100%);
+            --card-bg: rgba(255, 110, 199, 0.12);
+            --card-hover-bg: rgba(255, 110, 199, 0.2);
+            --border-color: rgba(0, 212, 255, 0.35);
+            --border-hover-color: rgba(255, 110, 199, 0.65);
+            --text-primary: #fef3ff;
+            --text-secondary: #fce7ff;
+            --text-accent: #ff6ec7;
+            --button-primary: linear-gradient(135deg, #ff6ec7 0%, #00d4ff 100%);
+            --glow-primary: 0 0 35px rgba(255, 110, 199, 0.5);
+            --shadow-intense: 0 10px 40px rgba(255, 110, 199, 0.4);
+        }
+
+        body[data-theme="gold"] {
+            --primary-bg: linear-gradient(135deg, #1a1200 0%, #332400 50%, #1a1200 100%);
+            --header-bg: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            --card-bg: rgba(251, 191, 36, 0.12);
+            --card-hover-bg: rgba(251, 191, 36, 0.2);
+            --border-color: rgba(255, 215, 0, 0.35);
+            --border-hover-color: rgba(255, 215, 0, 0.65);
+            --text-primary: #fefce8;
+            --text-secondary: #fef08a;
+            --text-accent: #facc15;
+            --button-primary: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+            --glow-primary: 0 0 35px rgba(250, 204, 21, 0.5);
+            --shadow-intense: 0 10px 40px rgba(251, 191, 36, 0.4);
+        }
+
+        body[data-theme="crimson"] {
+            --primary-bg: linear-gradient(135deg, #1a0000 0%, #330000 50%, #1a0000 100%);
+            --header-bg: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            --card-bg: rgba(220, 38, 38, 0.12);
+            --card-hover-bg: rgba(220, 38, 38, 0.2);
+            --border-color: rgba(220, 20, 60, 0.35);
+            --border-hover-color: rgba(220, 20, 60, 0.65);
+            --text-primary: #fee2e2;
+            --text-secondary: #fecaca;
+            --text-accent: #f87171;
+            --button-primary: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+            --glow-primary: 0 0 35px rgba(248, 113, 113, 0.6);
+            --shadow-intense: 0 10px 40px rgba(220, 38, 38, 0.4);
         }
 
         body {
-            width: 420px;
-            min-height: 650px;
-            font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            width: 450px;
+            min-height: 700px;
+            font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--primary-bg);
             color: var(--text-primary);
             overflow-x: hidden;
-            position: relative;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(0, 217, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(0, 153, 204, 0.1) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
         }
 
         .header {
             background: var(--header-bg);
-            padding: 24px 20px;
+            padding: 28px 24px;
             text-align: center;
+            box-shadow: var(--shadow-intense);
             position: relative;
-            box-shadow: 
-                0 4px 20px rgba(0, 0, 0, 0.3),
-                var(--glow-primary);
-            z-index: 1;
+            overflow: hidden;
         }
 
         .header::before {
@@ -114,92 +227,70 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
-            opacity: 0.3;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--text-accent), transparent);
         }
 
         .logo {
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 900;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            position: relative;
-            z-index: 2;
-            color:
-#0f0f23;
+            background: linear-gradient(135deg, var(--text-accent) 0%, #fff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
             letter-spacing: -0.5px;
+            margin-bottom: 8px;
         }
 
         .subtitle {
             font-size: 13px;
-            opacity: 0.9;
-            margin-top: 6px;
-            position: relative;
-            z-index: 2;
-            color: rgba(15, 15, 35, 0.8);
+            color: var(--text-secondary);
             font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .container {
-            padding: 24px 20px;
-            position: relative;
-            z-index: 1;
+            padding: 24px;
         }
 
         .tab-nav {
             background: var(--card-bg);
-            border-radius: 20px;
+            border-radius: 16px;
             padding: 6px;
             margin-bottom: 24px;
             backdrop-filter: blur(20px);
             border: 1px solid var(--border-color);
-            display: flex;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
 
         .tab-btn {
-            flex: 1;
-            padding: 14px 18px;
+            padding: 12px 8px;
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            border-radius: 16px;
+            border-radius: 12px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             position: relative;
-            overflow: hidden;
-        }
-
-        .tab-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .tab-btn:hover::before {
-            left: 100%;
         }
 
         .tab-btn:hover {
             color: var(--text-accent);
-            background: rgba(0, 217, 255, 0.1);
-            border: 1px solid rgba(0, 217, 255, 0.2);
+            background: var(--card-hover-bg);
         }
 
         .tab-btn.active {
             background: var(--button-primary);
-            color: #0f0f23;
+            color: white;
             box-shadow: var(--glow-primary);
-            font-weight: 900;
         }
 
         .tab-content {
@@ -214,7 +305,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         @keyframes fadeInUp {
             from { 
                 opacity: 0; 
-                transform: translateY(20px);
+                transform: translateY(15px);
             }
             to { 
                 opacity: 1; 
@@ -224,38 +315,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
         .section {
             background: var(--card-bg);
-            border-radius: 20px;
+            border-radius: 16px;
             padding: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             backdrop-filter: blur(20px);
             border: 1px solid var(--border-color);
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--text-accent), transparent);
-            opacity: 0.3;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         .section:hover {
             background: var(--card-hover-bg);
             border-color: var(--border-hover-color);
             transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
 
         .section-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 800;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             color: var(--text-primary);
             display: flex;
             align-items: center;
@@ -272,442 +351,399 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
         .button {
             width: 100%;
-            padding: 16px 24px;
+            padding: 14px 20px;
             background: var(--button-primary);
             border: none;
-            border-radius: 16px;
-            color: #0f0f23;
+            border-radius: 12px;
+            color: white;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-bottom: 12px;
-            position: relative;
-            overflow: hidden;
+            margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s;
-        }
-
-        .button:hover::before {
-            left: 100%;
+            box-shadow: 0 4px 15px rgba(94, 174, 255, 0.3);
         }
 
         .button:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--glow-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(94, 174, 255, 0.5);
         }
 
         .button:active {
-            transform: translateY(-1px);
-        }
-
-        .button.secondary {
-            background: var(--button-secondary);
-            color: var(--text-primary);
-        }
-
-        .button.secondary:hover {
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        .button.success {
-            background: var(--button-success);
-            color: #0f0f23;
-        }
-
-        .button.success:hover {
-            box-shadow: var(--glow-success);
-        }
-
-        .button.warning {
-            background: var(--button-warning);
-            color: #0f0f23;
-        }
-
-        .button.warning:hover {
-            box-shadow: var(--glow-warning);
-        }
-
-        .button.danger {
-            background: var(--button-danger);
-            color: var(--text-primary);
-        }
-
-        .button.danger:hover {
-            box-shadow: var(--glow-danger);
+            transform: translateY(0);
         }
 
         .hotkey-display {
-            background: var(--hotkey-bg);
-            padding: 20px;
-            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(94, 174, 255, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+            padding: 24px;
+            border-radius: 12px;
             text-align: center;
-            border: 2px solid var(--hotkey-border);
-            margin-bottom: 20px;
-            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-            font-size: 24px;
+            border: 2px solid var(--border-color);
+            margin-bottom: 16px;
+            font-family: 'Consolas', 'JetBrains Mono', monospace;
+            font-size: 32px;
             font-weight: 900;
             letter-spacing: 4px;
             color: var(--text-accent);
-            box-shadow: 
-                inset 0 2px 4px rgba(0, 0, 0, 0.2),
-                var(--glow-primary);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hotkey-display::before {
-            content: 'ACTIVE KEY';
-            position: absolute;
-            top: 4px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 10px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            box-shadow: var(--glow-primary);
         }
 
         .special-keys {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .hotkey-btn {
-            padding: 14px 12px;
+            padding: 12px;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             transition: all 0.3s ease;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
             text-transform: uppercase;
-        }
-
-        .hotkey-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.2), transparent);
-            transition: left 0.3s;
-        }
-
-        .hotkey-btn:hover::before {
-            left: 100%;
+            text-align: center;
         }
 
         .hotkey-btn:hover {
             background: var(--card-hover-bg);
             border-color: var(--border-hover-color);
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 217, 255, 0.2);
         }
 
         .hotkey-btn.active {
-            background: var(--hotkey-active-bg);
-            color: #0f0f23;
+            background: var(--button-primary);
+            color: white;
             border-color: var(--text-accent);
             box-shadow: var(--glow-primary);
-            font-weight: 900;
         }
 
         .custom-input {
             width: 100%;
-            padding: 16px 20px;
+            padding: 14px 16px;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 10px;
             color: var(--text-primary);
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
-            margin-bottom: 16px;
             transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+        }
+
+        .custom-input::placeholder {
+            color: var(--text-secondary);
         }
 
         .custom-input:focus {
             outline: none;
             border-color: var(--text-accent);
-            background: var(--card-hover-bg);
-            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(94, 174, 255, 0.2);
         }
 
-        .custom-input::placeholder {
-            color: var(--text-secondary);
-            font-style: italic;
+        .city-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        .status {
-            padding: 16px 20px;
-            border-radius: 12px;
-            text-align: center;
+        .city-link {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border-radius: 10px;
+            text-decoration: none;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            font-weight: 600;
             font-size: 13px;
+        }
+
+        .city-link:hover {
+            transform: translateX(4px);
+            background: var(--card-hover-bg);
+            border-color: var(--border-hover-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .theme-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .theme-card:hover {
+            border-color: var(--border-hover-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-card.active {
+            border-color: var(--text-accent);
+            box-shadow: var(--glow-primary);
+        }
+
+        .theme-preview {
+            width: 100%;
+            height: 60px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .theme-livesplit { background: #000; color: #fff; border: 1px solid #209cee; }
+        .theme-light { background: linear-gradient(135deg, #fff, #e2e8f0); color: #2563eb; border: 2px solid #3b82f6; }
+        .theme-dark { background: linear-gradient(135deg, #0f1115, #1a1d24); color: #60a5fa; border: 2px solid #60a5fa; }
+        .theme-neon { background: linear-gradient(135deg, #1a0033, #2d1b4e); color: #e9d5ff; border: 2px solid #c084fc; }
+        .theme-matrix { background: linear-gradient(135deg, #000d00, #001a00); color: #d1fae5; border: 2px solid #00ff88; }
+        .theme-sunset { background: linear-gradient(135deg, #1a0500, #330a00); color: #fff5e6; border: 2px solid #ff8e53; }
+        .theme-ocean { background: linear-gradient(135deg, #001233, #002147); color: #e0f2fe; border: 2px solid #4facfe; }
+        .theme-rose { background: linear-gradient(135deg, #2d0a1f, #4d1436); color: #fce7f3; border: 2px solid #f093fb; }
+        .theme-toxic { background: linear-gradient(135deg, #0d1f00, #1a3300); color: #ecfccb; border: 3px solid #39ff14; }
+        .theme-vaporwave { background: linear-gradient(135deg, #1a0b2e, #2d1b4e); color: #fef3ff; border: 2px solid #ff6ec7; }
+        .theme-gold { background: linear-gradient(135deg, #1a1200, #332400); color: #fefce8; border: 3px solid #ffd700; }
+        .theme-crimson { background: linear-gradient(135deg, #1a0000, #330000); color: #fee2e2; border: 3px solid #dc143c; }
+
+        .theme-name {
+            font-size: 11px;
             font-weight: 700;
-            margin-top: 16px;
-            display: none;
-            animation: slideInUp 0.4s ease-out;
+            color: var(--text-primary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        @keyframes slideInUp {
-            from { 
-                opacity: 0; 
-                transform: translateY(20px); 
-            }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
-            }
+        .status {
+            padding: 14px 18px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 14px;
+            display: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .status.success {
-            background: var(--status-success-bg);
-            color: var(--status-success-color);
-            border: 1px solid var(--status-success-border);
-            box-shadow: var(--glow-success);
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            border: 1px solid #22c55e;
         }
 
         .status.error {
-            background: var(--status-error-bg);
-            color: var(--status-error-color);
-            border: 1px solid var(--status-error-border);
-            box-shadow: var(--glow-danger);
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid #ef4444;
         }
 
         .instructions {
             background: var(--card-bg);
-            padding: 20px;
-            border-radius: 16px;
-            font-size: 13px;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 12px;
             line-height: 1.6;
-            border-left: 4px solid var(--text-accent);
+            border-left: 3px solid var(--text-accent);
             color: var(--text-secondary);
-            backdrop-filter: blur(10px);
-        }
-
-        .feature-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .feature-list li {
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            transition: color 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .feature-list li:hover {
-            color: var(--text-primary);
-        }
-
-        .feature-list li:last-child {
-            border-bottom: none;
-        }
-
-        .feature-list li::before {
-            content: '▸';
-            color: var(--text-accent);
-            font-weight: bold;
         }
 
         .footer {
             text-align: center;
             padding: 20px;
             font-size: 11px;
-            opacity: 0.6;
-            border-top: 1px solid var(--border-color);
-            margin-top: 24px;
             color: var(--text-secondary);
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .section {
-            animation: fadeInScale 0.3s ease-out;
-            animation-fill-mode: both;
-        }
-
-        .section:nth-child(1) { animation-delay: 0.1s; }
-        .section:nth-child(2) { animation-delay: 0.2s; }
-        .section:nth-child(3) { animation-delay: 0.3s; }
-
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.95) translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.1);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--text-accent);
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 217, 255, 0.8);
+            border-top: 1px solid var(--border-color);
         }
     </style>
 </head>
-<body>
+<body data-theme="livesplit">
     <div class="header">
-        <div class="logo">Gaming Tools Suite</div>
-        <div class="subtitle">Speedrun Timer & Subway Surfers Manager</div>
+        <div class="logo">GAMING TOOLS SUITE</div>
+        <div class="subtitle" style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+            <span>Complete Edition v4.0</span>
+            <a href="https://paypal.me/Leboncoinscrap" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: linear-gradient(135deg, #0070ba 0%, #1546a0 100%); color: white; text-decoration: none; border-radius: 6px; font-size: 11px; font-weight: 700; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0, 112, 186, 0.3);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.067 8.478c.492.88.556 2.014.3 3.327-.74 3.806-3.276 5.12-6.514 5.12h-.5a.805.805 0 0 0-.794.68l-.04.22-.63 3.993-.03.168a.804.804 0 0 1-.794.679H7.72a.483.483 0 0 1-.477-.558L8.926 12.7l.05-.278a.805.805 0 0 1 .793-.679h1.649c3.238 0 5.774-1.314 6.514-5.12.257-1.313.193-2.447-.3-3.327C17.334 2.462 16.348 2 15.094 2H6.906C6.48 2 6.1 2.306 6.03 2.718L3.197 20.09a.483.483 0 0 0 .477.558h3.474c.412 0 .762-.29.846-.686l.854-5.43a.805.805 0 0 1 .793-.679h.5c3.238 0 5.774-1.314 6.514-5.12.256-1.313.192-2.447-.3-3.327-.294-.527-.713-.938-1.232-1.228z"/>
+                </svg>
+                Donate
+            </a>
+        </div>
     </div>
 
     <div class="container">
         <div class="tab-nav">
             <button class="tab-btn active" data-tab="timer">Timer</button>
             <button class="tab-btn" data-tab="subway">Subway</button>
-            <button class="tab-btn" data-tab="zqsd">ZQSD/wasd</button>
+            <button class="tab-btn" data-tab="city">city</button>
+            <button class="tab-btn" data-tab="zqsd">ZQSD/WASD</button>
+            <button class="tab-btn" data-tab="resolution">resolution</button>
+            <button class="tab-btn" data-tab="themes">Themes</button>
         </div>
 
         <div class="tab-content active" id="timer-tab">
             <div class="section">
                 <div class="section-title">Timer Controls</div>
-                <button class="button" id="toggleTimer">Show/Hide Timer</button>
+                <button class="button" id="toggleTimer">Show/Hide</button>
             </div>
 
             <div class="section">
                 <div class="section-title">Active Key</div>
-                <div class="hotkey-display" id="currentHotkeyDisplay">T</div>
+                <div class="hotkey-display" id="currentHotkeyDisplay">CTRL</div>
                 
-                <div class="section-title">Special Keys</div>
+                <div class="section-title">Special Key</div>
                 <div class="special-keys">
-                    <div class="hotkey-btn" data-key="Control">CTRL</div>
+                    <div class="hotkey-btn active" data-key="Control">CTRL</div>
                     <div class="hotkey-btn" data-key="Shift">SHIFT</div>
                     <div class="hotkey-btn" data-key="Alt">ALT</div>
-                    <div class="hotkey-btn" data-key="Meta">META</div>
+                    <div class="hotkey-btn" data-key="Space">SPACE</div>
                 </div>
 
-                <input type="text" class="custom-input" id="customKeyInput" placeholder="Or press any key...">
+                <input type="text" class="custom-input" id="customKeyInput" placeholder="Ou appuyez sur une touche...">
             </div>
 
             <div class="instructions">
-                <div class="section-title">How to Use</div>
-                <ul class="feature-list">
-                    <li>Click "Show Timer" to display the overlay</li>
-                    <li>Use your key: Start → Pause → Reset</li>
-                    <li>Drag and drop the overlay anywhere</li>
-                    <li>Resize with handles on hover</li>
-                    <li>Type a key in the field to set it</li>
-                </ul>
+                <strong>Instructions:</strong> Start → Pause → Reset with your key. Move and resize the timer.
             </div>
         </div>
 
         <div class="tab-content" id="subway-tab">
             <div class="section">
-                <div class="section-title">Save Management</div>
-                <button class="button success" id="backup">
-                    Create Backup
-                </button>
-                <button class="button secondary" id="restore">
-                    Restore Backup
-                </button>
-                <button class="button warning" id="save100">
-                    100% Complete Save
-                </button>
-                <button class="button danger" id="cleanData">
-                    Clean Data
-                </button>
-            </div>
-
-            <div class="section">
-                <div class="section-title">100% Save Contents</div>
-                <ul class="feature-list">
-                    <li>All characters unlocked</li>
-                    <li>All boards available</li>
-                    <li>Maxed power-ups</li>
-                    <li>Completed missions</li>
-                    <li>Customizable high score</li>
-                    <li>Unlimited coins and keys</li>
-                    <li>Unlocked achievements</li>
-                </ul>
+                <div class="section-title">Backup Management</div>
+                <button class="button" id="backup">Create Backup</button>
+                <button class="button" id="restore">Restore</button>
+                <button class="button" id="save100">Unlock All</button>
+                <button class="button" id="cleanData">Erase all data</button>
             </div>
 
             <div class="instructions">
-                <div class="section-title">Important</div>
-                <p>Always backup your progress before using restoration tools. This extension works with the web version of Subway Surfers.</p>
+                <strong>Important:</strong> You can donate with paypal y.benyedder06@gmail.com
+            </div>
+        </div>
+
+        <div class="tab-content" id="city-tab">
+            <div class="section">
+                <div class="section-title">Available Cities</div>
+                <div class="city-list">
+                    <a href="#" class="city-link" data-url="https://yell0wsuit.page/assets/games/subway-surfers-unity/index.html">🌉 San Francisco</a>
+                    <a href="#" class="city-link" data-url="https://yell0wsuit.page/assets/games/subway-surfers-unity/zurich.html">🏔️ Zurich</a>
+                    <a href="#" class="city-link" data-url="https://yell0wsuit.page/assets/games/subway-surfers-unity/winterholiday.html">❄️ Winter Holiday</a>
+                    <a href="#" class="city-link" data-url="https://yell0wsuit.page/assets/games/subway-surfers-unity/monaco.html">🏎️ Monaco</a>
+                    <a href="#" class="city-link" data-url="https://yell0wsuit.page/assets/games/subway-surfers-unity/london.html">🇬🇧 London</a>
+                    <a href="#" class="city-link" data-url="https://yell0wsuit.page/assets/games/subway-surfers-unity/houston.html">🤠 Houston</a>
+                    <a href="#" class="city-link" data-url="https://yell0wsuit.page/assets/games/subway-surfers-unity/havana.html">🇨🇺 Havana</a>
+                    <a href="#" class="city-link" data-url="https://yell0wsuit.page/assets/games/subway-surfers-unity/berlin.html">🇩🇪 Berlin</a>
+                    <a href="#" class="city-link" data-url="https://yell0wsuit.page/assets/games/subway-surfers-unity/beijing.html">🇨🇳 Beijing</a>
+                    <a href="#" class="city-link" data-url="https://yell0wsuit.page/assets/games/subway-surfers-unity/mexico.html">🇲🇽 Mexico (2020)</a>
+                    <a href="#" class="city-link" data-url="https://yell0wsuit.page/assets/games/subway-surfers-unity/iceland.html">🇮🇸 Iceland</a>
+                    <a href="#" class="city-link" data-url="https://yell0wsuit.page/assets/games/subway-surfers-unity/buenos-aires.html">🇦🇷 Buenos Aires</a>
+                    <a href="#" class="city-link" data-url="https://yell0wsuit.page/assets/games/subway-surfers-unity/barcelona.html">🇪🇸 Barcelona</a>
+                    <a href="#" class="city-link" data-url="https://yell0wsuit.page/assets/games/subway-surfers-unity/miami.html">🌴 Miami</a>
+                    <a href="#" class="city-link" data-url="https://yell0wsuit.page/assets/games/subway-surfers-unity/neworleans.html">🎺 New Orleans</a>
+                </div>
+            </div>
+
+            <div class="instructions">
+                <strong>Info:</strong> Click on a city to open Subway Surfers in a new tab.
             </div>
         </div>
 
         <div class="tab-content" id="zqsd-tab">
             <div class="section">
-                <div class="section-title">ZQSD/WASD Controls</div>
-                <button class="button success" id="activateZqsd">
-                    Activate ZQSD/WASD
-                </button>
-                <button class="button danger" id="deactivateZqsd">
-                    Deactivate ZQSD/WASD
-                </button>
-            </div>
-
-            <div class="section">
-                <div class="section-title">Key Mapping</div>
-                <ul class="feature-list">
-                    <li>Z / W → Up Arrow</li>
-                    <li>Q / A → Left Arrow</li>
-                    <li>S → Down Arrow</li>
-                    <li>D → Right Arrow</li>
-                    <li>1 → Space Bar</li>
-                </ul>
+                <div class="section-title">Control ZQSD/WASD</div>
+                <button class="button" id="activateZqsd">Activate</button>
+                <button class="button" id="deactivateZqsd">Disable</button>
             </div>
 
             <div class="instructions">
-                <div class="section-title">How to Use</div>
-                <p>Activate the script to map ZQSD (AZERTY) or WASD (QWERTY) keys to arrow keys. Perfect for games that use arrows but you prefer ZQSD/WASD. Works on all websites and supports both keyboard layouts.</p>
+                <strong>Mapping:</strong> Z/W→Up, Q/A→Left, S→Down, D→Right, 1→Space. Activation persists automatically.
+            </div>
+        </div>
+
+        <div class="tab-content" id="resolution-tab">
+            <div class="section">
+                <div class="section-title">Mode Resolution 608x1080</div>
+                <div style="background: rgba(94, 174, 255, 0.1); padding: 16px; border-radius: 10px; margin-bottom: 16px; border: 1px solid var(--border-color);">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-weight: 700; font-size: 13px;">Current status:</span>
+                        <span id="resolutionStatus" style="padding: 6px 12px; border-radius: 6px; font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444;">INACTIF</span>
+                    </div>
+                </div>
+                <button class="button" id="activateResolution" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);">Force Resolution</button>
+                <button class="button" id="deactivateResolution" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);">Restore Normal</button>
+            </div>
+
+            <div class="instructions">
+                <strong>⚠️ Warning:</strong> This mode forces a 608x1080 vertical resolution, ideal for speedruns. Restoring will automatically reload the page to cancel zooming.
+            </div>
+        </div>
+
+        <div class="tab-content" id="themes-tab">
+            <div class="section">
+                <div class="section-title">Theme Selection</div>
+                <div class="theme-grid">
+                    <div class="theme-card active" data-theme="livesplit">
+                        <div class="theme-preview theme-livesplit">00:00</div>
+                        <div class="theme-name">LiveSplit</div>
+                    </div>
+                    <div class="theme-card" data-theme="light">
+                        <div class="theme-preview theme-light">00:00</div>
+                        <div class="theme-name">Light</div>
+                    </div>
+                    <div class="theme-card" data-theme="dark">
+                        <div class="theme-preview theme-dark">00:00</div>
+                        <div class="theme-name">Dark</div>
+                    </div>
+                    <div class="theme-card" data-theme="neon">
+                        <div class="theme-preview theme-neon">00:00</div>
+                        <div class="theme-name">Neon</div>
+                    </div>
+                    <div class="theme-card" data-theme="matrix">
+                        <div class="theme-preview theme-matrix">00:00</div>
+                        <div class="theme-name">Matrix</div>
+                    </div>
+                    <div class="theme-card" data-theme="sunset">
+                        <div class="theme-preview theme-sunset">00:00</div>
+                        <div class="theme-name">Sunset</div>
+                    </div>
+                    <div class="theme-card" data-theme="ocean">
+                        <div class="theme-preview theme-ocean">00:00</div>
+                        <div class="theme-name">Ocean</div>
+                    </div>
+                    <div class="theme-card" data-theme="rose">
+                        <div class="theme-preview theme-rose">00:00</div>
+                        <div class="theme-name">Rose</div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="status" id="status"></div>
     </div>
 
-    <div class="footer">
-        v3.1 - Gaming Tools Suite Enhanced
-    </div>
+    <div class="footer">v4.0 - Complete Edition</div>
 
     <script src="popup.js"></script>
 </body>
