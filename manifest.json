@@ -10,7 +10,7 @@
     "downloads"
   ],
   "host_permissions": [
-    "https://yell0wsuit.page/*"
+    "<all_urls>"
   ],
   "background": {
     "service_worker": "background.js"

@@ -17,11 +17,52 @@ chrome.runtime.onInstalled.addListener(() => {
         },
         unifiedTheme: 'livesplit',
         zqsdActive: false,
-        resolutionActive: false
+        resolutionActive: false,
+        adblockActive: true,
+        adsBlocked: 0,
+        sessionBlocked: 0,
+        adblockStats: {
+            today: 0,
+            total: 0,
+            lastReset: new Date().toDateString()
+        }
     });
     
-    console.log("Paramètres initialisés avec thème livesplit");
+    console.log("Paramètres initialisés avec thème livesplit et adblock");
+    console.log('Bloqueur de publicités installé');
 });
+
+// Réinitialiser les stats de session au démarrage
+chrome.runtime.onStartup.addListener(() => {
+    chrome.storage.local.set({ sessionBlocked: 0 });
+    console.log('Session adblock réinitialisée');
+});
+
+// Incrémenter le compteur de publicités bloquées
+function incrementBlockCount() {
+    chrome.storage.local.get(['adsBlocked', 'sessionBlocked', 'adblockStats'], (data) => {
+        const adsBlocked = (data.adsBlocked || 0) + 1;
+        const sessionBlocked = (data.sessionBlocked || 0) + 1;
+        
+        let stats = data.adblockStats || { today: 0, total: 0, lastReset: new Date().toDateString() };
+        const currentDate = new Date().toDateString();
+        
+        // Réinitialiser le compteur journalier si nécessaire
+        if (stats.lastReset !== currentDate) {
+            stats.today = 0;
+            stats.lastReset = currentDate;
+        }
+        
+        stats.today += 1;
+        stats.total += 1;
+        
+        chrome.storage.local.set({ 
+            adsBlocked, 
+            sessionBlocked,
+            adblockStats: stats
+        });
+    });
+}
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log("Background reçoit:", message);
@@ -111,6 +152,56 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         chrome.storage.local.get(['resolutionActive'], (result) => {
             sendResponse({ active: result.resolutionActive || false });
         });
+        return true;
+    }
+    
+    // AdBlock - Activer
+    if (message.action === "enableAdblock") {
+        chrome.storage.local.set({ adblockActive: true }, () => {
+            sendResponse({ success: true });
+        });
+        return true;
+    }
+    
+    // AdBlock - Désactiver
+    if (message.action === "disableAdblock") {
+        chrome.storage.local.set({ adblockActive: false }, () => {
+            sendResponse({ success: true });
+        });
+        return true;
+    }
+    
+    // AdBlock - Récupérer l'état
+    if (message.action === "getAdblockState") {
+        chrome.storage.local.get(['adblockActive', 'adblockStats'], (result) => {
+            sendResponse({ 
+                active: result.adblockActive !== undefined ? result.adblockActive : true,
+                stats: result.adblockStats || { today: 0, total: 0 }
+            });
+        });
+        return true;
+    }
+    
+    // AdBlock - Réinitialiser les statistiques
+    if (message.action === "resetAdblockStats") {
+        chrome.storage.local.set({ 
+            adblockStats: {
+                today: 0,
+                total: 0,
+                lastReset: new Date().toDateString()
+            },
+            adsBlocked: 0,
+            sessionBlocked: 0
+        }, () => {
+            sendResponse({ success: true });
+        });
+        return true;
+    }
+    
+    // AdBlock - Publicité bloquée
+    if (message.action === "adBlocked") {
+        incrementBlockCount();
+        sendResponse({ success: true });
         return true;
     }
     

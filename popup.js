@@ -7,6 +7,10 @@ console.log("Gaming Tools Suite - Popup script loaded");
 let currentActiveKey = 'Control';
 let isResolutionActive = false;
 
+// Easter Egg variables
+let themeClickCount = 0;
+let themeClickTimeout = null;
+
 // Initialiser immédiatement si le DOM est déjà chargé
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
@@ -20,9 +24,7 @@ function init() {
     loadCurrentHotkey();
     setupTimerEventListeners();
     setupSubwayEventListeners();
-    // NOUVEL APPEL POUR LA SÉLECTION DE VILLE
     setupSubwayCityEventListeners();
-    // FIN NOUVEL APPEL
     setupZqsdEventListeners();
     setupResolutionEventListeners();
     setupThemeEventListeners();
@@ -32,7 +34,7 @@ function init() {
 }
 
 // ================================
-// TAB SYSTEM
+// TAB SYSTEM + EASTER EGG
 // ================================
 
 function setupTabNavigation() {
@@ -46,9 +48,158 @@ function setupTabNavigation() {
             tabButtons.forEach(btn => btn.classList.remove('active'));
             document.getElementById(`${targetTab}-tab`).classList.add('active');
             button.classList.add('active');
+            
+            // Easter Egg: 10 clics sur "Themes"
+            if (targetTab === 'themes') {
+                themeClickCount++;
+                console.log(`Theme click: ${themeClickCount}/10`);
+                
+                // Réinitialiser après 2 secondes d'inactivité
+                clearTimeout(themeClickTimeout);
+                themeClickTimeout = setTimeout(() => {
+                    themeClickCount = 0;
+                }, 2000);
+                
+                // Déclencher l'easter egg
+                if (themeClickCount === 10) {
+                    console.log("🎉 Easter Egg Triggered!");
+                    triggerConfettiEasterEgg();
+                    themeClickCount = 0;
+                }
+            } else {
+                // Reset si on change d'onglet
+                themeClickCount = 0;
+            }
         });
     });
 }
+
+function triggerConfettiEasterEgg() {
+    showStatus("🎉 EASTER EGG DÉBLOQUÉ ! 🎉", true);
+    
+    // Créer le style pour les animations
+    if (!document.getElementById('confetti-styles')) {
+        const style = document.createElement('style');
+        style.id = 'confetti-styles';
+        style.textContent = `
+            @keyframes confettiFall {
+                0% {
+                    transform: translateY(0) translateX(0) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(600px) translateX(var(--drift)) rotate(var(--rotation));
+                    opacity: 0;
+                }
+            }
+            .confetti-piece {
+                position: fixed;
+                pointer-events: none;
+                z-index: 999999;
+                animation: confettiFall var(--duration) linear forwards;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    // Créer le conteneur de confettis
+    const confettiContainer = document.createElement('div');
+    confettiContainer.id = 'confetti-container';
+    confettiContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 999998;
+        overflow: hidden;
+    `;
+    document.body.appendChild(confettiContainer);
+    
+    // Générer les confettis
+    const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#ff0088', '#88ff00', '#0088ff'];
+    const confettiCount = 150;
+    
+    for (let i = 0; i < confettiCount; i++) {
+        setTimeout(() => {
+            createConfetti(confettiContainer, colors);
+        }, i * 20);
+    }
+    
+    // Nettoyer après 5 secondes
+    setTimeout(() => {
+        confettiContainer.style.transition = 'opacity 0.5s';
+        confettiContainer.style.opacity = '0';
+        setTimeout(() => {
+            if (confettiContainer.parentNode) {
+                confettiContainer.remove();
+            }
+        }, 500);
+    }, 5000);
+    
+    // Animation du logo
+    animateLogo();
+}
+
+function createConfetti(container, colors) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti-piece';
+    
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const size = Math.random() * 12 + 6;
+    const left = Math.random() * 100;
+    const duration = Math.random() * 2 + 2;
+    const drift = (Math.random() - 0.5) * 300;
+    const rotation = Math.random() * 720 + 360;
+    const shape = Math.random() > 0.5 ? 'square' : 'circle';
+    
+    confetti.style.cssText = `
+        left: ${left}%;
+        top: -20px;
+        width: ${size}px;
+        height: ${size}px;
+        background: ${color};
+        border-radius: ${shape === 'circle' ? '50%' : '0'};
+        --duration: ${duration}s;
+        --drift: ${drift}px;
+        --rotation: ${rotation}deg;
+    `;
+    
+    container.appendChild(confetti);
+    
+    setTimeout(() => {
+        if (confetti.parentNode) {
+            confetti.remove();
+        }
+    }, duration * 1000 + 100);
+}
+
+function animateLogo() {
+    const logo = document.querySelector('.logo');
+    if (!logo) return;
+    
+    const originalTransform = logo.style.transform;
+    let count = 0;
+    
+    const animate = () => {
+        if (count >= 8) {
+            logo.style.transform = originalTransform;
+            logo.style.transition = '';
+            return;
+        }
+        
+        logo.style.transition = 'transform 0.15s ease';
+        const scale = count % 2 === 0 ? 'scale(1.4) rotate(20deg)' : 'scale(0.85) rotate(-20deg)';
+        logo.style.transform = scale;
+        count++;
+        
+        setTimeout(animate, 150);
+    };
+    
+    animate();
+}
+
 
 // ================================
 // SPEEDRUN TIMER FEATURES

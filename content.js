@@ -4,6 +4,126 @@
  */
 console.log("Gaming Tools Suite Complete - Content script chargé");
 
+
+
+// ================================
+// ADBLOCK FUNCTIONS
+// ================================
+
+// Sélecteurs courants pour les publicités
+const adSelectors = [
+    '[id*="google_ads"]',
+    '[class*="google-ad"]',
+    '[id*="ad-"]',
+    '[class*="ad-"]',
+    '[class*="advertisement"]',
+    'iframe[src*="doubleclick"]',
+    'iframe[src*="googlesyndication"]',
+    '.adsbygoogle',
+    '[id*="banner"]',
+    '[class*="banner"]',
+    '[id*="sponsor"]',
+    '[class*="sponsor"]',
+    '[class*="AdBox"]',
+    '[class*="ad_container"]',
+    '[id*="popup"]',
+    '[class*="popup-ad"]'
+];
+
+let adblockActive = true;
+let adblockObserver = null;
+
+// Fonction pour masquer les publicités
+function hideAds() {
+    if (!adblockActive) return 0;
+    
+    const selector = adSelectors.join(', ');
+    const ads = document.querySelectorAll(selector);
+    let blockedCount = 0;
+    
+    ads.forEach(ad => {
+        if (ad.style.display !== 'none') {
+            ad.style.display = 'none';
+            ad.style.visibility = 'hidden';
+            ad.style.opacity = '0';
+            ad.style.height = '0';
+            ad.style.width = '0';
+            ad.style.position = 'absolute';
+            ad.style.pointerEvents = 'none';
+            blockedCount++;
+        }
+    });
+    
+    if (blockedCount > 0) {
+        chrome.runtime.sendMessage({ action: "adBlocked" });
+    }
+    
+    return blockedCount;
+}
+
+// Initialiser l'adblock
+function initAdblock() {
+    chrome.runtime.sendMessage({ action: "getAdblockState" }, (response) => {
+        if (response && response.active !== undefined) {
+            adblockActive = response.active;
+            
+            if (adblockActive) {
+                startAdblocking();
+            } else {
+                stopAdblocking();
+            }
+        }
+    });
+}
+
+// Démarrer le blocage
+function startAdblocking() {
+    console.log("AdBlock activé sur cette page");
+    
+    // Masquer les publicités au chargement
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', hideAds);
+    } else {
+        hideAds();
+    }
+    
+    // Observer les changements du DOM
+    if (!adblockObserver) {
+        adblockObserver = new MutationObserver((mutations) => {
+            hideAds();
+        });
+        
+        adblockObserver.observe(document.documentElement, {
+            childList: true,
+            subtree: true
+        });
+    }
+    
+    // Vérifier périodiquement
+    setInterval(() => {
+        if (adblockActive) {
+            hideAds();
+        }
+    }, 2000);
+}
+
+// Arrêter le blocage
+function stopAdblocking() {
+    console.log("AdBlock désactivé sur cette page");
+    
+    if (adblockObserver) {
+        adblockObserver.disconnect();
+        adblockObserver = null;
+    }
+}
+
+// Initialiser l'adblock au chargement
+initAdblock();
+
+// ================================
+// TIMER & OTHER FEATURES
+// ================================
+
 // Variables globales
 let timerOverlay = null;
 let timerState = 'stopped';
@@ -60,10 +180,8 @@ function applyPermanent608x1080() {
     const html = document.documentElement;
     
     const existingTimer = document.getElementById('speedrun-timer-overlay');
-    // Suppression de l'ancienne logique de déplacement du timer (timerParent)
     
-    // NOUVELLE LOGIQUE POUR LE TIMER : Déplacer le timer dans l'élément racine (<html>) 
-    // pour éviter qu'il ne soit contraint par le <body> en position: fixed.
+    // Déplacer le timer dans l'élément racine (<html>)
     if (existingTimer) {
         document.documentElement.appendChild(existingTimer);
         existingTimer.style.position = 'fixed';
@@ -84,9 +202,9 @@ function applyPermanent608x1080() {
         top: 50% !important;
         transform: translate(-50%, -50%) !important;
         box-sizing: border-box !important;
+        background-color: #000000 !important;
+        background-image: none !important;
     `;
-
-    // Suppression de l'ancienne logique de repositionnement du timer ici (if existingTimer && timerParent)
     
     html.style.cssText = `
         margin: 0 !important;
@@ -94,9 +212,13 @@ function applyPermanent608x1080() {
         width: 100vw !important;
         height: 100vh !important;
         overflow: hidden !important;
-        background: transparent !important;
+        background: #000000 !important;
+        background-image: none !important;
         box-sizing: border-box !important;
     `;
+
+    // Appliquer le fond noir sur les conteneurs du jeu
+    applyBlackBackground();
 
     document.body.offsetHeight;
     html.offsetHeight;
@@ -135,7 +257,7 @@ function applyPermanent608x1080() {
         pointer-events: none;
         opacity: 0.8;
     `;
-    indicator.textContent = '608×1080 ACTIF';
+    indicator.textContent = '608×1080 ACTIF - FOND NOIR';
     indicator.id = 'resolution-indicator-permanent';
     document.body.appendChild(indicator);
 
@@ -151,7 +273,7 @@ function applyPermanent608x1080() {
         }
     }, 3000);
 
-    console.log("Mode 608x1080 appliqué de manière permanente");
+    console.log("Mode 608x1080 appliqué de manière permanente avec fond noir");
     isResolutionForced = true;
 }
 
@@ -257,19 +379,7 @@ function activateZqsdDirectly() {
             q: ['ArrowLeft', 37],
         };
         
-        if (e.key === '1') {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            targets.forEach(t => t.dispatchEvent(new KeyboardEvent(e.type, {
-                key: ' ',
-                code: 'Space',
-                keyCode: 32,
-                which: 32,
-                bubbles: true
-            })));
-            return;
-        }
-        
+
         if (e.key === ' ' && e.isTrusted) {
             e.preventDefault();
             e.stopImmediatePropagation();
@@ -878,6 +988,16 @@ chrome.runtime.onMessage.addListener((msg, sender, respond) => {
             window.location.reload(); 
         }
         respond({ success: true, enabled: isResolutionForced });
+    }
+    if (msg.action === "enableAdblock") {
+        adblockActive = true;
+        startAdblocking();
+        respond({success: true});
+    }
+    if (msg.action === "disableAdblock") {
+        adblockActive = false;
+        stopAdblocking();
+        respond({success: true});
     }
     return true;
 });
