@@ -27,9 +27,7 @@ function init() {
     setupSubwayCityEventListeners();
     setupZqsdEventListeners();
     setupResolutionEventListeners();
-    setupThemeEventListeners();
-    loadTheme();
-    loadResolutionState();
+    setupColorEventListeners();
     console.log("Popup initialized successfully");
 }
 
@@ -629,6 +627,7 @@ function deactivateZqsd() {
 function setupResolutionEventListeners() {
     const activateBtn = document.getElementById('activateResolution');
     const deactivateBtn = document.getElementById('deactivateResolution');
+    const blackBarsToggle = document.getElementById('blackBarsToggle');
 
     if (activateBtn) {
         activateBtn.addEventListener('click', function() {
@@ -643,6 +642,34 @@ function setupResolutionEventListeners() {
             toggleResolution(false);
         });
     }
+
+    if (blackBarsToggle) {
+        // Charger l'état sauvegardé
+        chrome.storage.local.get(['blackBarsEnabled'], (result) => {
+            blackBarsToggle.checked = result.blackBarsEnabled !== false; // Par défaut true
+        });
+
+        blackBarsToggle.addEventListener('change', function() {
+            const enabled = blackBarsToggle.checked;
+            chrome.storage.local.set({ blackBarsEnabled: enabled });
+            
+            // Si la résolution est active, recharger la page pour réappliquer
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (tabs[0]) {
+                    chrome.tabs.sendMessage(tabs[0].id, { 
+                        action: "reloadWithBlackBars", 
+                        enabled: enabled
+                    }, (response) => {
+                        if (response && response.reloaded) {
+                            showStatus(enabled ? "Page rechargée avec barres noires" : "Page rechargée sans barres noires", true);
+                        } else {
+                            showStatus("Paramètre sauvegardé. Activez la résolution pour appliquer.", true);
+                        }
+                    });
+                }
+            });
+        });
+    }
 }
 
 function toggleResolution(shouldActivate) {
@@ -652,18 +679,24 @@ function toggleResolution(shouldActivate) {
             return;
         }
         
-        chrome.tabs.sendMessage(tabs[0].id, { 
-            action: "toggleResolution", 
-            activate: shouldActivate
-        }, (response) => {
-            if (chrome.runtime.lastError) {
-                showStatus("Rechargez la page pour la résolution", false);
-            } else if (response && response.success) {
-                updateResolutionStatus(response.enabled);
-                showStatus(shouldActivate ? "Résolution 608x1080 forcée !" : "Résolution normale rétablie. Rechargez la page.", true);
-                
-                // Si on désactive, le content script va recharger la page, pas besoin de le faire ici.
-            }
+        // Récupérer l'état des barres noires
+        chrome.storage.local.get(['blackBarsEnabled'], (result) => {
+            const blackBarsEnabled = result.blackBarsEnabled !== false; // Par défaut true
+            
+            chrome.tabs.sendMessage(tabs[0].id, { 
+                action: "toggleResolution", 
+                activate: shouldActivate,
+                blackBarsEnabled: blackBarsEnabled
+            }, (response) => {
+                if (chrome.runtime.lastError) {
+                    showStatus("Rechargez la page pour la résolution", false);
+                } else if (response && response.success) {
+                    updateResolutionStatus(response.enabled);
+                    showStatus(shouldActivate ? "Résolution 608x1080 forcée !" : "Résolution normale rétablie. Rechargez la page.", true);
+                    
+                    // Si on désactive, le content script va recharger la page, pas besoin de le faire ici.
+                }
+            });
         });
     });
 }
@@ -694,39 +727,74 @@ function updateResolutionStatus(isActive) {
 }
 
 // ================================
-// THEME FEATURES
+// TIMER COLOR FEATURES
 // ================================
 
-function setupThemeEventListeners() {
-    const themeCards = document.querySelectorAll('.theme-card');
+function setupColorEventListeners() {
+    const colorStopped = document.getElementById('color-stopped');
+    const colorRunning = document.getElementById('color-running');
+    const colorPaused = document.getElementById('color-paused');
+    const saveColorsBtn = document.getElementById('save-colors');
+    const resetColorsBtn = document.getElementById('reset-colors');
 
-    themeCards.forEach(card => {
-        card.addEventListener('click', function() {
-            const theme = card.dataset.theme;
-            if (theme) {
-                setTheme(theme);
-                addButtonFeedback(card);
-            }
-        });
+    // Mettre à jour la valeur affichée quand on change la couleur
+    [colorStopped, colorRunning, colorPaused].forEach(input => {
+        if (input) {
+            input.addEventListener('input', (e) => {
+                const colorItem = e.target.closest('.color-item');
+                const hexDisplay = colorItem ? colorItem.querySelector('.color-hex-display') : null;
+                const previewBox = colorItem ? colorItem.querySelector('.color-preview-box') : null;
+                
+                const newColor = e.target.value.toUpperCase();
+                if (hexDisplay) hexDisplay.textContent = newColor;
+                if (previewBox) previewBox.style.background = newColor;
+            });
+        }
     });
+
+    if (saveColorsBtn) {
+        saveColorsBtn.addEventListener('click', () => {
+            const colors = {
+                stopped: colorStopped.value.toUpperCase(),
+                running: colorRunning.value.toUpperCase(),
+                paused: colorPaused.value.toUpperCase()
+            };
+            saveTimerColors(colors);
+            addButtonFeedback(saveColorsBtn);
+        });
+    }
+
+    if (resetColorsBtn) {
+        resetColorsBtn.addEventListener('click', () => {
+            const defaultColors = {
+                stopped: '#FFFFFF',
+                running: '#FFFFFF',
+                paused: '#FFFFFF'
+            };
+            applyColorsToUI(defaultColors);
+            saveTimerColors(defaultColors);
+            addButtonFeedback(resetColorsBtn);
+        });
+    }
+
+    loadTimerColors();
 }
 
-function setTheme(theme) {
+function saveTimerColors(colors) {
     chrome.runtime.sendMessage({ 
-        action: "saveTheme", 
-        theme: theme 
+        action: "saveTimerColors", 
+        colors: colors 
     }, (response) => {
         if (chrome.runtime.lastError) return;
         if (response && response.success) {
-            applyThemeToPopup(theme);
-            showStatus(`Thème changé à ${theme.charAt(0).toUpperCase() + theme.slice(1)}`, true);
+            showStatus('Colors saved successfully!', true);
             
-            // Envoyer un message au script de contenu pour mettre à jour le thème du timer
+            // Envoyer un message au script de contenu pour mettre à jour les couleurs
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 if (tabs[0]) {
                     chrome.tabs.sendMessage(tabs[0].id, { 
-                        action: "updateTheme", 
-                        theme: theme 
+                        action: "updateTimerColors", 
+                        colors: colors 
                     });
                 }
             });
@@ -734,26 +802,58 @@ function setTheme(theme) {
     });
 }
 
-function loadTheme() {
-    chrome.runtime.sendMessage({ action: "getTheme" }, (response) => {
+function loadTimerColors() {
+    chrome.runtime.sendMessage({ action: "getTimerColors" }, (response) => {
         if (chrome.runtime.lastError) return;
-        if (response && response.theme) {
-            applyThemeToPopup(response.theme);
+        if (response && response.colors) {
+            applyColorsToUI(response.colors);
         }
     });
 }
 
-function applyThemeToPopup(theme) {
-    document.body.dataset.theme = theme;
-    
-    // Mettre à jour l'état actif des cartes
-    const themeCards = document.querySelectorAll('.theme-card');
-    themeCards.forEach(card => {
-        card.classList.remove('active');
-        if (card.dataset.theme === theme) {
-            card.classList.add('active');
-        }
-    });
+function applyColorsToUI(colors) {
+    const colorStopped = document.getElementById('color-stopped');
+    const colorRunning = document.getElementById('color-running');
+    const colorPaused = document.getElementById('color-paused');
+
+    if (colorStopped) {
+        colorStopped.value = colors.stopped;
+        const colorItem = colorStopped.closest('.color-item');
+        const hexDisplay = colorItem?.querySelector('.color-hex-display');
+        const previewBox = colorItem?.querySelector('.color-preview-box');
+        if (hexDisplay) hexDisplay.textContent = colors.stopped;
+        if (previewBox) previewBox.style.background = colors.stopped;
+    }
+
+    if (colorRunning) {
+        colorRunning.value = colors.running;
+        const colorItem = colorRunning.closest('.color-item');
+        const hexDisplay = colorItem?.querySelector('.color-hex-display');
+        const previewBox = colorItem?.querySelector('.color-preview-box');
+        if (hexDisplay) hexDisplay.textContent = colors.running;
+        if (previewBox) previewBox.style.background = colors.running;
+    }
+
+    if (colorPaused) {
+        colorPaused.value = colors.paused;
+        const colorItem = colorPaused.closest('.color-item');
+        const hexDisplay = colorItem?.querySelector('.color-hex-display');
+        const previewBox = colorItem?.querySelector('.color-preview-box');
+        if (hexDisplay) hexDisplay.textContent = colors.paused;
+        if (previewBox) previewBox.style.background = colors.paused;
+    }
+}
+
+function getCurrentColorValues() {
+    const colorStopped = document.getElementById('color-stopped');
+    const colorRunning = document.getElementById('color-running');
+    const colorPaused = document.getElementById('color-paused');
+
+    return {
+        stopped: colorStopped ? colorStopped.value.toUpperCase() : '#FFFFFF',
+        running: colorRunning ? colorRunning.value.toUpperCase() : '#FFFFFF',
+        paused: colorPaused ? colorPaused.value.toUpperCase() : '#FFFFFF'
+    };
 }
 
 // ================================

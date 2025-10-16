@@ -8,14 +8,14 @@
     --border-hover-color: #64748b;
     --text-primary: #f8fafc;
     --text-secondary: #cbd5e1;
-    --text-accent: #60a5fa;
-    --button-primary: linear-gradient(135deg, #3b82f6, #2563eb);
-    --glow-primary: 0 0 20px rgba(59, 130, 246, 0.5);
+    --text-accent: #000000;
+    --button-primary: linear-gradient(135deg, #000000, #1a1a1a);
+    --glow-primary: 0 0 20px rgba(0, 0, 0, 0.5);
     --timer-bg: rgba(15, 23, 42, 0.9);
     --timer-text: #f8fafc;
     --timer-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    --timer-border: 2px solid #3b82f6;
-    --timer-glow: #3b82f6;
+    --timer-border: 2px solid #000000;
+    --timer-glow: #000000;
     --border-radius: 12px;
     --transition: all 0.3s ease;
 }

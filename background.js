@@ -15,7 +15,11 @@ chrome.runtime.onInstalled.addListener(() => {
             size: { width: 320, height: 80 },
             visible: false
         },
-        unifiedTheme: 'livesplit',
+        timerColors: {
+            stopped: '#FFFFFF',
+            running: '#FFFFFF',
+            paused: '#FFFFFF'
+        },
         zqsdActive: false,
         resolutionActive: false,
         adblockActive: true,
@@ -82,16 +86,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return true;
     }
     
-    // Gestion thème unifié
-    if (message.action === "getTheme") {
-        chrome.storage.local.get(['unifiedTheme'], (result) => {
-            sendResponse({ theme: result.unifiedTheme || 'livesplit' });
+    // Gestion couleurs timer
+    if (message.action === "getTimerColors") {
+        chrome.storage.local.get(['timerColors'], (result) => {
+            sendResponse({ colors: result.timerColors || { stopped: '#FFFFFF', running: '#FFFFFF', paused: '#FFFFFF' } });
         });
         return true;
     }
     
-    if (message.action === "saveTheme") {
-        chrome.storage.local.set({ unifiedTheme: message.theme }, () => {
+    if (message.action === "saveTimerColors") {
+        chrome.storage.local.set({ timerColors: message.colors }, () => {
             sendResponse({ success: true });
         });
         return true;

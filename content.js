@@ -132,7 +132,6 @@ let currentTime = 0;
 let timerInterval = null;
 let isVisible = false;
 let currentHotkey = 'Control';
-let currentTheme = 'livesplit';
 let zqsdHandler = null;
 let isResolutionForced = false;
 
@@ -140,16 +139,6 @@ let isResolutionForced = false;
 chrome.runtime.sendMessage({ action: "getHotkey" }, (response) => {
     if (response && response.hotkey) {
         currentHotkey = response.hotkey;
-    }
-});
-
-// Charger le thème
-chrome.runtime.sendMessage({ action: "getTheme" }, (response) => {
-    if (response && response.theme) {
-        currentTheme = response.theme;
-        if (timerOverlay) {
-            applyThemeToTimer(currentTheme);
-        }
     }
 });
 
@@ -165,8 +154,20 @@ chrome.runtime.sendMessage({ action: "getZqsdState" }, (response) => {
 // RESOLUTION 608x1080 FUNCTIONS
 // ================================
 
-function applyPermanent608x1080() {
+let blackBarsEnabled = true; // Par défaut activé
+
+// Charger l'état des barres noires au démarrage
+chrome.storage.local.get(['blackBarsEnabled'], (result) => {
+    if (result.blackBarsEnabled !== undefined) {
+        blackBarsEnabled = result.blackBarsEnabled;
+    }
+});
+
+function applyPermanent608x1080(enableBlackBars = true) {
     console.log("Application permanente du mode 608x1080");
+    blackBarsEnabled = enableBlackBars;
+    // Sauvegarder l'état
+    chrome.storage.local.set({ blackBarsEnabled: enableBlackBars });
     
     let viewportMeta = document.querySelector('meta[name="viewport"]');
     if (!viewportMeta) {
@@ -180,8 +181,10 @@ function applyPermanent608x1080() {
     const html = document.documentElement;
     
     const existingTimer = document.getElementById('speedrun-timer-overlay');
+    // Suppression de l'ancienne logique de déplacement du timer (timerParent)
     
-    // Déplacer le timer dans l'élément racine (<html>)
+    // NOUVELLE LOGIQUE POUR LE TIMER : Déplacer le timer dans l'élément racine (<html>) 
+    // pour éviter qu'il ne soit contraint par le <body> en position: fixed.
     if (existingTimer) {
         document.documentElement.appendChild(existingTimer);
         existingTimer.style.position = 'fixed';
@@ -202,23 +205,20 @@ function applyPermanent608x1080() {
         top: 50% !important;
         transform: translate(-50%, -50%) !important;
         box-sizing: border-box !important;
-        background-color: #000000 !important;
-        background-image: none !important;
     `;
+
+    // Suppression de l'ancienne logique de repositionnement du timer ici (if existingTimer && timerParent)
     
+    const backgroundColor = blackBarsEnabled ? '#000000' : 'transparent';
     html.style.cssText = `
         margin: 0 !important;
         padding: 0 !important;
         width: 100vw !important;
         height: 100vh !important;
         overflow: hidden !important;
-        background: #000000 !important;
-        background-image: none !important;
+        background: ${backgroundColor} !important;
         box-sizing: border-box !important;
     `;
-
-    // Appliquer le fond noir sur les conteneurs du jeu
-    applyBlackBackground();
 
     document.body.offsetHeight;
     html.offsetHeight;
@@ -257,7 +257,7 @@ function applyPermanent608x1080() {
         pointer-events: none;
         opacity: 0.8;
     `;
-    indicator.textContent = '608×1080 ACTIF - FOND NOIR';
+    indicator.textContent = '608×1080 ACTIF';
     indicator.id = 'resolution-indicator-permanent';
     document.body.appendChild(indicator);
 
@@ -273,7 +273,7 @@ function applyPermanent608x1080() {
         }
     }, 3000);
 
-    console.log("Mode 608x1080 appliqué de manière permanente avec fond noir");
+    console.log("Mode 608x1080 appliqué de manière permanente");
     isResolutionForced = true;
 }
 
@@ -379,7 +379,19 @@ function activateZqsdDirectly() {
             q: ['ArrowLeft', 37],
         };
         
-
+        if (e.key === '1') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            targets.forEach(t => t.dispatchEvent(new KeyboardEvent(e.type, {
+                key: ' ',
+                code: 'Space',
+                keyCode: 32,
+                which: 32,
+                bubbles: true
+            })));
+            return;
+        }
+        
         if (e.key === ' ' && e.isTrusted) {
             e.preventDefault();
             e.stopImmediatePropagation();
@@ -409,213 +421,70 @@ function activateZqsdDirectly() {
 }
 
 // ================================
-// TIMER THEME STYLES
+// TIMER COLOR SETTINGS
 // ================================
 
-const THEME_STYLES = {
-    livesplit: {
-        bg: '#000000',
-        text: '#FFFFFF',
-        border: 'none',
-        shadow: 'none',
-        textShadow: 'none',
-        customStyles: {
-            fontFamily: "'Segoe UI', Arial, sans-serif",
-            fontWeight: '400',
-            letterSpacing: '0px',
-            borderRadius: '0px',
-            backdropFilter: 'none'
-        }
-    },
-    light: {
-        bg: '#ffffff',
-        text: '#2563eb',
-        border: '2px solid #3b82f6',
-        shadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-        textShadow: '0 2px 8px rgba(37, 99, 235, 0.3)',
-        customStyles: {
-            fontFamily: "'Inter', 'Segoe UI', sans-serif",
-            fontWeight: '800',
-            letterSpacing: '2px'
-        }
-    },
-    dark: {
-        bg: 'linear-gradient(135deg, #0f1115 0%, #1a1d24 100%)',
-        text: '#60a5fa',
-        border: '3px solid #60a5fa',
-        shadow: '0 0 40px rgba(96, 165, 250, 0.6)',
-        textShadow: '0 0 25px #60a5fa',
-        customStyles: {
-            fontFamily: "'JetBrains Mono', monospace",
-            fontWeight: '800',
-            letterSpacing: '2px'
-        }
-    },
-    neon: {
-        bg: 'linear-gradient(135deg, #1a0033 0%, #2d1b4e 100%)',
-        text: '#e9d5ff',
-        border: '3px solid #c084fc',
-        shadow: '0 0 50px rgba(192, 132, 252, 0.8)',
-        textShadow: '0 0 30px #c084fc',
-        customStyles: {
-            fontFamily: "'Rajdhani', sans-serif",
-            fontWeight: '800',
-            letterSpacing: '2px'
-        }
-    },
-    matrix: {
-        bg: 'linear-gradient(135deg, #000d00 0%, #001a00 100%)',
-        text: '#d1fae5',
-        border: '3px solid #00ff88',
-        shadow: '0 0 50px rgba(0, 255, 136, 0.8)',
-        textShadow: '0 0 30px #00ff88',
-        customStyles: {
-            fontFamily: "'Courier New', monospace",
-            fontWeight: '800',
-            letterSpacing: '2px'
-        }
-    },
-    sunset: {
-        bg: 'linear-gradient(135deg, #1a0500 0%, #330a00 100%)',
-        text: '#fff5e6',
-        border: '3px solid #ff8e53',
-        shadow: '0 0 50px rgba(255, 142, 83, 0.8)',
-        textShadow: '0 0 25px #ff8e53',
-        customStyles: {
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: '800',
-            letterSpacing: '2px'
-        }
-    },
-    ocean: {
-        bg: 'linear-gradient(135deg, #001233 0%, #002147 100%)',
-        text: '#e0f2fe',
-        border: '3px solid #4facfe',
-        shadow: '0 0 50px rgba(79, 172, 254, 0.6)',
-        textShadow: '0 0 25px #4facfe',
-        customStyles: {
-            fontFamily: "'Open Sans', sans-serif",
-            fontWeight: '800',
-            letterSpacing: '2px'
-        }
-    },
-    rose: {
-        bg: 'linear-gradient(135deg, #2d0a1f 0%, #4d1436 100%)',
-        text: '#fce7f3',
-        border: '3px solid #f093fb',
-        shadow: '0 0 50px rgba(240, 147, 251, 0.8)',
-        textShadow: '0 0 25px #f093fb',
-        customStyles: {
-            fontFamily: "'Raleway', sans-serif",
-            fontWeight: '800',
-            letterSpacing: '2px'
-        }
-    },
-    toxic: {
-        bg: 'linear-gradient(135deg, #0d1f00 0%, #1a3300 100%)',
-        text: '#ecfccb',
-        border: '3px solid #39ff14',
-        shadow: '0 0 60px rgba(57, 255, 20, 0.9)',
-        textShadow: '0 0 30px #39ff14',
-        customStyles: {
-            fontFamily: "'JetBrains Mono', monospace",
-            fontWeight: '800',
-            letterSpacing: '2px'
-        }
-    },
-    vaporwave: {
-        bg: 'linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 100%)',
-        text: '#fef3ff',
-        border: '3px solid #ff6ec7',
-        shadow: '0 0 50px rgba(255, 110, 199, 0.8)',
-        textShadow: '0 0 25px #ff6ec7',
-        customStyles: {
-            fontFamily: "'Rajdhani', sans-serif",
-            fontWeight: '800',
-            letterSpacing: '3px'
-        }
-    },
-    gold: {
-        bg: 'linear-gradient(135deg, #1a1200 0%, #332400 100%)',
-        text: '#fefce8',
-        border: '3px solid #ffd700',
-        shadow: '0 0 60px rgba(255, 215, 0, 0.8)',
-        textShadow: '0 0 30px #ffd700',
-        customStyles: {
-            fontFamily: "'Cinzel', serif",
-            fontWeight: '800',
-            letterSpacing: '2px'
-        }
-    },
-    crimson: {
-        bg: 'linear-gradient(135deg, #1a0000 0%, #330000 100%)',
-        text: '#fee2e2',
-        border: '3px solid #dc143c',
-        shadow: '0 0 60px rgba(220, 20, 60, 0.9)',
-        textShadow: '0 0 30px #dc143c',
-        customStyles: {
-            fontFamily: "'Oswald', sans-serif",
-            fontWeight: '800',
-            letterSpacing: '2px'
-        }
-    }
+let timerColors = {
+    stopped: '#FFFFFF',   // Couleur quand arrêté (0.00)
+    running: '#FFFFFF',   // Couleur quand en marche
+    paused: '#FFFFFF'     // Couleur quand en pause
 };
 
-function applyThemeToTimer(theme) {
+// Charger les couleurs personnalisées
+chrome.runtime.sendMessage({ action: "getTimerColors" }, (response) => {
+    if (response && response.colors) {
+        timerColors = response.colors;
+        applyTimerColor();
+    }
+});
+
+function applyTimerColor() {
     if (!timerOverlay) return;
-    
-    const style = THEME_STYLES[theme] || THEME_STYLES.livesplit;
-    
-    timerOverlay.style.background = style.bg;
-    timerOverlay.style.border = style.border;
-    timerOverlay.style.boxShadow = style.shadow;
-    
     const display = timerOverlay.querySelector('#timer-display');
     if (!display) return;
     
-    display.style.color = style.text;
-    display.style.textShadow = style.textShadow;
+    let color = timerColors.stopped;
+    if (timerState === 'running') color = timerColors.running;
+    else if (timerState === 'paused') color = timerColors.paused;
     
-    if (theme === 'livesplit') {
-        timerOverlay.style.background = "linear-gradient(to bottom, #2d2d30 0%, #1e1e1e 100%)";
-        timerOverlay.style.border = "1px solid #3c3c3c";
-        timerOverlay.style.borderRadius = "0";
-        timerOverlay.style.boxShadow = "0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)";
-        timerOverlay.style.backdropFilter = "none";
-        timerOverlay.style.padding = "0";
+    display.style.color = color;
+}
 
-        display.style.color = "#ffffff";
-        display.style.fontFamily = "'Consolas','Monaco','Lucida Console',monospace";
-        display.style.fontWeight = "bold";
-        display.style.textShadow = "1px 1px 2px rgba(0,0,0,0.8)";
-        display.style.fontSize = "32px";
-        display.style.letterSpacing = "1px";
-        display.style.textAlign = "center";
-    } else {
-        timerOverlay.style.borderRadius = '12px';
-        timerOverlay.style.backdropFilter = 'blur(8px)';
-        
-        display.style.position = 'absolute';
-        display.style.top = '50%';
-        display.style.left = '50%';
-        display.style.transform = 'translate(-50%, -50%)';
-        display.style.width = 'auto';
-        display.style.height = 'auto';
-        display.style.textAlign = 'center';
-        display.style.padding = '0';
-        
-        if (style.customStyles) {
-            Object.entries(style.customStyles).forEach(([property, value]) => {
-                if (['borderRadius', 'backdropFilter'].includes(property)) {
-                    timerOverlay.style[property] = value;
-                }
-                if (['fontFamily', 'letterSpacing', 'fontWeight'].includes(property)) {
-                    display.style[property] = value;
-                }
-            });
-        }
-    }
+function applyThemeToTimer() {
+    if (!timerOverlay) return;
+    const display = timerOverlay.querySelector('#timer-display');
+    if (!display) return;
     
+    Object.assign(timerOverlay.style, {
+        background: '#000',
+        border: 'none',
+        borderRadius: '0',
+        boxShadow: 'none',
+        backdropFilter: 'none',
+        padding: '0'
+    });
+
+    Object.assign(display.style, {
+        fontFamily: "'Calibri','Segoe UI',Arial,sans-serif",
+        fontWeight: 'bold',
+        textShadow: 'none',
+        fontSize: '43px',
+        letterSpacing: '0',
+        textAlign: 'right',
+        padding: '8px 12px',
+        lineHeight: '1',
+        position: 'relative',
+        transform: 'none',
+        top: 'auto',
+        left: 'auto',
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end'
+    });
+    
+    applyTimerColor();
     const rect = timerOverlay.getBoundingClientRect();
     updateFontSize(rect.width, rect.height);
 }
@@ -631,91 +500,30 @@ function createTimerOverlay() {
     timerOverlay.id = 'speedrun-timer-overlay';
     timerOverlay.innerHTML = `
         <style>
-            #speedrun-timer-overlay {
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                width: 280px;
-                height: 60px;
-                z-index: 2147483647;
-                display: none;
-                user-select: none;
-                min-width: 180px;
-                min-height: 40px;
-                max-width: 800px;
-                max-height: 200px;
-                overflow: hidden;
-                background: #000000;
-                border: none;
-                box-shadow: none;
-            }
-            #timer-content {
-                width: 100%;
-                height: 100%;
-                position: relative;
-                cursor: move;
-            }
-            #timer-display {
-                font-family: 'Segoe UI', Arial, sans-serif;
-                font-weight: 400;
-                font-size: 43px;
-                letter-spacing: 0px;
-                line-height: 1;
-                color: #FFFFFF;
-                text-shadow: none;
-                white-space: nowrap;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 100%;
-                height: 100%;
-                padding: 10px 15px;
-                box-sizing: border-box;
-            }
-            .timer-stopped { opacity: 1; }
-            .timer-running { opacity: 1; }
-            .timer-paused { opacity: 1; }
-            .resize-handle {
-                position: absolute;
-                background: transparent;
-                z-index: 2147483648;
-                opacity: 0;
-                transition: opacity 0.2s;
-            }
-            #speedrun-timer-overlay:hover .resize-handle {
-                opacity: 0.3;
-                background: rgba(255, 255, 255, 0.1);
-            }
-            .resize-handle:hover {
-                opacity: 0.6 !important;
-                background: rgba(255, 255, 255, 0.2) !important;
-            }
-            .resize-nw { top: 0; left: 0; width: 12px; height: 12px; cursor: nw-resize; }
-            .resize-ne { top: 0; right: 0; width: 12px; height: 12px; cursor: ne-resize; }
-            .resize-sw { bottom: 0; left: 0; width: 12px; height: 12px; cursor: sw-resize; }
-            .resize-se { bottom: 0; right: 0; width: 12px; height: 12px; cursor: se-resize; }
-            .resize-n { top: 0; left: 12px; right: 12px; height: 8px; cursor: n-resize; }
-            .resize-s { bottom: 0; left: 12px; right: 12px; height: 8px; cursor: s-resize; }
-            .resize-w { left: 0; top: 12px; bottom: 12px; width: 8px; cursor: w-resize; }
-            .resize-e { right: 0; top: 12px; bottom: 12px; width: 8px; cursor: e-resize; }
-            .size-indicator {
-                position: absolute;
-                top: -35px;
-                right: 0;
-                background: rgba(0, 0, 0, 0.9);
-                color: #ffffff;
-                padding: 6px 12px;
-                font-size: 12px;
-                opacity: 0;
-                pointer-events: none;
-                font-family: 'Segoe UI', Arial, sans-serif;
-                font-weight: 400;
-                transition: opacity 0.2s;
-            }
-            #speedrun-timer-overlay.resizing .size-indicator { opacity: 1; }
+            #speedrun-timer-overlay{position:fixed;top:20px;right:20px;width:225px;height:50px;z-index:2147483647;display:none;user-select:none;min-width:180px;min-height:40px;max-width:800px;max-height:200px;overflow:hidden;background:#000;border:none;box-shadow:none;border-radius:0}
+            #timer-content{width:100%;height:100%;position:relative;cursor:move}
+            #timer-display{font-family:'Calibri','Segoe UI',Arial,sans-serif;font-weight:bold;font-size:43px;letter-spacing:0;line-height:1;color:#FFF;text-shadow:none;white-space:nowrap;display:flex;align-items:baseline;justify-content:flex-end;width:100%;height:100%;padding:8px 12px;box-sizing:border-box;position:relative}
+            #timer-display .time-main{font-size:1em;line-height:1;display:inline-block}
+            #timer-display .time-decimals{font-size:.7em;line-height:1;display:inline-block;transform:translateY(0.12em)}
+            .timer-stopped,.timer-running,.timer-paused{color:#FFF}
+            .resize-handle{position:absolute;background:transparent;z-index:2147483648;opacity:0;transition:opacity .2s}
+            #speedrun-timer-overlay:hover .resize-handle{opacity:.3;background:rgba(255,255,255,.1)}
+            .resize-handle:hover{opacity:.6!important;background:rgba(255,255,255,.2)!important}
+            .resize-nw{top:0;left:0;width:12px;height:12px;cursor:nw-resize}
+            .resize-ne{top:0;right:0;width:12px;height:12px;cursor:ne-resize}
+            .resize-sw{bottom:0;left:0;width:12px;height:12px;cursor:sw-resize}
+            .resize-se{bottom:0;right:0;width:12px;height:12px;cursor:se-resize}
+            .resize-n{top:0;left:12px;right:12px;height:8px;cursor:n-resize}
+            .resize-s{bottom:0;left:12px;right:12px;height:8px;cursor:s-resize}
+            .resize-w{left:0;top:12px;bottom:12px;width:8px;cursor:w-resize}
+            .resize-e{right:0;top:12px;bottom:12px;width:8px;cursor:e-resize}
+            .size-indicator{position:absolute;top:-35px;right:0;background:rgba(0,0,0,.9);color:#FFF;padding:6px 12px;font-size:12px;opacity:0;pointer-events:none;font-family:'Segoe UI',Arial,sans-serif;font-weight:400;transition:opacity .2s;border-radius:3px}
+            #speedrun-timer-overlay.resizing .size-indicator{opacity:1}
         </style>
         <div id="timer-content">
-            <div id="timer-display" class="timer-stopped">00:00.000</div>
+            <div id="timer-display" class="timer-stopped">
+                <span class="time-main">0</span><span class="time-decimals">.00</span>
+            </div>
         </div>
         <div class="resize-handle resize-nw" data-direction="nw"></div>
         <div class="resize-handle resize-ne" data-direction="ne"></div>
@@ -725,13 +533,11 @@ function createTimerOverlay() {
         <div class="resize-handle resize-s" data-direction="s"></div>
         <div class="resize-handle resize-w" data-direction="w"></div>
         <div class="resize-handle resize-e" data-direction="e"></div>
-        <div class="size-indicator">280px × 60px</div>
+        <div class="size-indicator">225px × 50px</div>
     `;
     
-    // MODIFICATION : Attacher à l'élément racine <html> au lieu de <body>
     document.documentElement.appendChild(timerOverlay); 
-    
-    applyThemeToTimer(currentTheme);
+    applyThemeToTimer();
     makeDraggable(timerOverlay);
     makeResizable(timerOverlay);
     loadSettings();
@@ -761,16 +567,19 @@ function loadSettings() {
 }
 
 function makeDraggable(el) {
-    let pos1=0, pos2=0, pos3=0, pos4=0, isDragging=false;
-    el.addEventListener('mousedown', (e) => {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0, isDragging = false;
+    
+    el.addEventListener('mousedown', dragStart);
+    
+    function dragStart(e) {
         if (e.target.classList.contains('resize-handle')) return;
         e.preventDefault();
         isDragging = true;
         pos3 = e.clientX;
         pos4 = e.clientY;
         document.addEventListener('mousemove', drag);
-        document.addEventListener('mouseup', stop);
-    });
+        document.addEventListener('mouseup', stopDrag);
+    }
     
     function drag(e) {
         if (!isDragging) return;
@@ -779,15 +588,19 @@ function makeDraggable(el) {
         pos2 = pos4 - e.clientY;
         pos3 = e.clientX;
         pos4 = e.clientY;
-        el.style.left = Math.max(0, Math.min((el.offsetLeft || 0) - pos1, window.innerWidth - el.offsetWidth)) + "px";
-        el.style.top = Math.max(0, Math.min((el.offsetTop || 0) - pos2, window.innerHeight - el.offsetHeight)) + "px";
+        
+        const newLeft = Math.max(0, Math.min((el.offsetLeft || 0) - pos1, window.innerWidth - el.offsetWidth));
+        const newTop = Math.max(0, Math.min((el.offsetTop || 0) - pos2, window.innerHeight - el.offsetHeight));
+        
+        el.style.left = `${newLeft}px`;
+        el.style.top = `${newTop}px`;
         saveTimerSettings();
     }
     
-    function stop() {
+    function stopDrag() {
         isDragging = false;
         document.removeEventListener('mousemove', drag);
-        document.removeEventListener('mouseup', stop);
+        document.removeEventListener('mouseup', stopDrag);
         saveTimerSettings();
     }
 }
@@ -797,7 +610,9 @@ function makeResizable(el) {
     const indicator = el.querySelector('.size-indicator');
     let isResizing = false, dir = '', startX = 0, startY = 0, startW = 0, startH = 0, startL = 0, startT = 0;
     
-    handles.forEach(h => h.addEventListener('mousedown', (e) => {
+    handles.forEach(h => h.addEventListener('mousedown', startResize));
+    
+    function startResize(e) {
         e.preventDefault();
         e.stopPropagation();
         isResizing = true;
@@ -813,7 +628,7 @@ function makeResizable(el) {
         el.classList.add('resizing');
         document.addEventListener('mousemove', resize);
         document.addEventListener('mouseup', stopResize);
-    }));
+    }
     
     function resize(e) {
         if (!isResizing) return;
@@ -824,13 +639,13 @@ function makeResizable(el) {
         
         let w = startW, h = startH, l = startL, t = startT;
         
-        if(dir.includes('e')) w = Math.max(180, Math.min(800, startW + dx));
-        if(dir.includes('w')) {
+        if (dir.includes('e')) w = Math.max(180, Math.min(800, startW + dx));
+        if (dir.includes('w')) {
             w = Math.max(180, Math.min(800, startW - dx));
             l = startL + (startW - w);
         }
-        if(dir.includes('s')) h = Math.max(40, Math.min(200, startH + dy));
-        if(dir.includes('n')) {
+        if (dir.includes('s')) h = Math.max(40, Math.min(200, startH + dy));
+        if (dir.includes('n')) {
             h = Math.max(40, Math.min(200, startH - dy));
             t = startT + (startH - h);
         }
@@ -846,6 +661,7 @@ function makeResizable(el) {
     }
     
     function stopResize() {
+        if (!isResizing) return;
         isResizing = false;
         document.removeEventListener('mousemove', resize);
         document.removeEventListener('mouseup', stopResize);
@@ -860,62 +676,76 @@ function updateFontSize(w, h) {
     if (!d) return;
 
     const baseSize = 43;
-    const scaleX = w / 280;
-    const scaleY = h / 60;
+    const baseWidth = 225;
+    const baseHeight = 50;
+    const scaleX = w / baseWidth;
+    const scaleY = h / baseHeight;
     const scale = Math.min(scaleX, scaleY);
     const size = Math.max(18, Math.min(120, baseSize * scale));
 
-    if (currentTheme === 'livesplit') {
-        d.style.fontSize = `${size}px`;
-        d.style.letterSpacing = '0px';
-        d.style.lineHeight = '1';
-    } else {
-        const letterSpacing = Math.max(1, Math.min(3, 2 * scale));
-        d.style.fontSize = `${size}px`;
-        d.style.letterSpacing = `${letterSpacing}px`;
-        d.style.lineHeight = '1';
+    d.style.fontSize = `${size}px`;
+    d.style.letterSpacing = '0px';
+    d.style.lineHeight = '1';
+    d.style.padding = '8px 12px';
+    d.style.textAlign = 'right';
+    
+    const decimals = d.querySelector('.time-decimals');
+    if (decimals) {
+        decimals.style.fontSize = '0.7em';
     }
 }
 
 function saveTimerSettings() {
     if (!timerOverlay) return;
-    const r = timerOverlay.getBoundingClientRect();
+    const rect = timerOverlay.getBoundingClientRect();
     chrome.runtime.sendMessage({
         action: "saveTimerSettings",
-        position: { x: r.left, y: r.top },
-        size: { width: r.width, height: r.height },
+        position: { x: Math.round(rect.left), y: Math.round(rect.top) },
+        size: { width: Math.round(rect.width), height: Math.round(rect.height) },
         visible: isVisible
     });
 }
 
 function formatTime(ms) {
-    const m = Math.floor(ms/60000);
-    const s = Math.floor((ms%60000)/1000);
-    const milli = Math.floor(ms%1000);
-    return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}.${milli.toString().padStart(3,'0')}`;
+    const totalSec = Math.floor(ms / 1000);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    const cs = Math.floor((ms % 1000) / 10);
+    
+    const decimalPart = cs.toString().padStart(2, '0');
+    const mainPart = h > 0 
+        ? `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+        : m > 0 
+            ? `${m}:${s.toString().padStart(2, '0')}`
+            : `${s}`;
+    
+    return { mainPart, decimalPart };
 }
 
 function updateTimer() {
-    if (!timerOverlay || !isVisible) return;
+    if (!timerOverlay || !isVisible || timerState !== 'running') return;
     
-    if (timerState === 'running') {
-        currentTime = performance.now() - startTime;
-        const display = timerOverlay.querySelector('#timer-display');
-        if (display) {
-            display.textContent = formatTime(currentTime);
-        }
-    }
+    currentTime = performance.now() - startTime;
+    const display = timerOverlay.querySelector('#timer-display');
+    if (!display) return;
+    
+    const { mainPart, decimalPart } = formatTime(currentTime);
+    display.innerHTML = `<span class="time-main">${mainPart}</span><span class="time-decimals">.${decimalPart}</span>`;
 }
 
 function controlTimer() {
     if (!isVisible) return;
     const display = timerOverlay.querySelector('#timer-display');
+    if (!display) return;
     
     if (timerState === 'stopped') {
+        // Start timer
         startTime = performance.now();
         currentTime = 0;
         timerState = 'running';
         display.className = 'timer-running';
+        applyTimerColor();
         
         const updateFrame = () => {
             if (timerState === 'running') {
@@ -925,15 +755,21 @@ function controlTimer() {
         };
         timerInterval = requestAnimationFrame(updateFrame);
     } else if (timerState === 'running') {
+        // Pause timer
         cancelAnimationFrame(timerInterval);
         timerState = 'paused';
         display.className = 'timer-paused';
+        applyTimerColor();
     } else {
+        // Reset timer
         cancelAnimationFrame(timerInterval);
         timerState = 'stopped';
         currentTime = 0;
         display.className = 'timer-stopped';
-        display.textContent = '00:00.000';
+        applyTimerColor();
+        
+        // Reset à 0.00
+        display.innerHTML = '<span class="time-main">0</span><span class="time-decimals">.00</span>';
     }
 }
 
@@ -958,9 +794,9 @@ chrome.runtime.onMessage.addListener((msg, sender, respond) => {
         currentHotkey = msg.hotkey; 
         respond({success: true}); 
     }
-    if (msg.action === "updateTheme") {
-        currentTheme = msg.theme;
-        applyThemeToTimer(currentTheme);
+    if (msg.action === "updateTimerColors") {
+        timerColors = msg.colors;
+        applyTimerColor();
         respond({success: true});
     }
     if (msg.action === "activateZqsd") {
@@ -981,13 +817,34 @@ chrome.runtime.onMessage.addListener((msg, sender, respond) => {
     }
     if (msg.action === "toggleResolution") {
         if (!isResolutionForced) {
-            applyPermanent608x1080();
+            const enableBlackBars = msg.blackBarsEnabled !== false;
+            applyPermanent608x1080(enableBlackBars);
         } else {
             restoreNormalResolution();
             // MODIFICATION : Recharger la page après la désactivation de la résolution
             window.location.reload(); 
         }
         respond({ success: true, enabled: isResolutionForced });
+    }
+    if (msg.action === "updateBlackBars") {
+        if (isResolutionForced) {
+            blackBarsEnabled = msg.enabled !== false;
+            const html = document.documentElement;
+            const backgroundColor = blackBarsEnabled ? '#000000' : 'transparent';
+            html.style.background = `${backgroundColor} !important`;
+        }
+        respond({ success: true });
+    }
+    if (msg.action === "reloadWithBlackBars") {
+        if (isResolutionForced) {
+            // Sauvegarder l'état avant de recharger
+            blackBarsEnabled = msg.enabled !== false;
+            // Recharger la page pour réappliquer la résolution avec le nouveau paramètre
+            window.location.reload();
+            respond({ success: true, reloaded: true });
+        } else {
+            respond({ success: false, reloaded: false });
+        }
     }
     if (msg.action === "enableAdblock") {
         adblockActive = true;
